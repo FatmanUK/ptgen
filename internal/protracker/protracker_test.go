@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// Mostly written by Google Gemini Pro. Tweaked extensively by me.
+
 const MSG_ERR_FAILED = "Failed handling valid input: %v"
 const MSG_ERR_EXPECTED = "\nExpected: [% X]\nGot:      [% X]"
 const MSG_ERR_FAIL_FAIL = "Expected constraint violation error, but execution passed"
@@ -231,19 +233,19 @@ func TestWriteMod_Integration(t *testing.T) {
 		Patterns: []Pattern{mockPattern},
 	}
 	tests = append(tests, ModProjectTestError{
-		name: "Standard compliant export compilation",
-		project: mpCompliant,
+		name:        "Standard compliant export compilation",
+		project:     mpCompliant,
 		shouldFail:  false,
 		expectedLen: 1084 + (2 * 1024), // Header + 2 patterns
 	})
 	tests = append(tests, ModProjectTestError{
-		name: "Reject sequence tracking length underflow",
-		project: mpEmptyOrderList,
+		name:       "Reject sequence tracking length underflow",
+		project:    mpEmptyOrderList,
 		shouldFail: true,
 	})
 	tests = append(tests, ModProjectTestError{
-		name: "Reject sequence tracking length overflow",
-		project: mpOrderListTooLong,
+		name:       "Reject sequence tracking length overflow",
+		project:    mpOrderListTooLong,
 		shouldFail: true,
 	})
 
