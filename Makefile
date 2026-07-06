@@ -12,7 +12,7 @@ BUILD_TIMESTAMP = $(shell date +%Y%m%dT%H%M%SZ)
 CKSUM_SCRIPT = import hashlib; print(hashlib.sha1(open('./$(APP_BINARY)','rb').read()).hexdigest())
 
 BUILD_ENV=CGO_ENABLED=0
-BUILD_LDFLAGS=-s -w
+BUILD_LDFLAGS=-s -w -X main.APP_NAME=$(APP_BINARY) -X main.VERSION=$(VERSION)
 
 # Default target
 all: clean podman-build
@@ -31,7 +31,10 @@ mod-download:
 	$(GO) mod download
 
 build: mod-download
-	$(BUILD_ENV) $(GO) build -ldflags="$(BUILD_LDFLAGS)" -o ./$(APP_BINARY) ./main
+	$(BUILD_ENV) $(GO) build \
+		-ldflags="$(BUILD_LDFLAGS)" \
+		-o ./$(APP_BINARY) \
+		./main
 
 # Run unit tests
 test:

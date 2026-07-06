@@ -5,14 +5,19 @@ FROM alpine:latest
 ARG BUILD_TIMESTAMP
 ARG VERSION
 ARG APP_BINARY
+ARG APP_PATH='/opt'
+
+# Bridge ARG to ENV
+ENV BINARY=${APP_BINARY}
+ENV BPATH=${APP_PATH}
 
 # Labels for date, timestamp, and version
 LABEL org.opencontainers.image.created=${BUILD_TIMESTAMP}
 LABEL org.opencontainers.image.version=${VERSION}
 
 # Set opt workdir
-WORKDIR /opt/
+WORKDIR ${APP_PATH}/
 COPY ${APP_BINARY} .
 
 USER 1000
-CMD ["./${APP_BINARY}"]
+ENTRYPOINT ["/bin/sh", "-c", "${BPATH}/${BINARY} \"$@\"", "--"]
