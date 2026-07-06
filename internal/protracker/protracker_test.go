@@ -8,17 +8,6 @@ import (
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
 
-const MSG_ERR_FAILED = "Failed handling valid input: %v"
-const MSG_ERR_EXPECTED = "\nExpected: [% X]\nGot:      [% X]"
-const MSG_ERR_FAIL_FAIL = "Expected constraint violation error, but execution passed"
-const MSG_ERR_WRONG_ERROR = "Expected error message containing '%s', got '%v'"
-const MSG_ERR_FAIL_CRRPT = "Failed to notice a corrupt payload setup"
-const MSG_ERR_FAIL_VALID = "Compilation pipeline failed on valid payload setup: %v"
-const MSG_ERR_SIZE = "Binary payload footprint mismatch. Expected %d bytes, got %d"
-const MSG_ERR_TITLE = "Title field error. Expected custom byte-padding format layout"
-const MSG_ERR_BAD_FMT = "Format validation failure. 'M.K.' magic bytes missing from target offset 1080 (got %q)"
-const MSG_ERR_BAD_INS = "Instrument sample slot header #%d failed configuration constraints setup"
-
 type CellTestData struct {
 	name     string
 	input    Cell
