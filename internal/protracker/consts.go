@@ -1,5 +1,9 @@
 package protracker
 
+// These are just defaults.
+const DEFAULT_SPEED = 6
+const DEFAULT_BPM   = 125
+
 // These can be changed, if you don't want PT compatibility.
 const ROWS_PER_PATTERN = 64
 const CHANNELS_PER_ROW = 4

@@ -15,8 +15,6 @@ import (
 // WriteMod compiles proj into a binary ProTracker file stream.
 // Populate proj, run WriteMod and the file appears in w.
 
-// TODO: add build helpers?
-
 // Amiga PAL periods for MilkyTracker octaves 3, 4, and 5.
 var periodMap = map[string]uint16{
 	"C-3": 856, "C#3": 808, "D-3": 762, "D#3": 720,
@@ -46,6 +44,14 @@ type Row [CHANNELS_PER_ROW]Cell
 // A Pattern is a slice of ROWS_PER_PATTERN Rows.
 type Pattern [ROWS_PER_PATTERN]Row
 
+type ModInfo struct {
+	Title    string
+	Speed    uint8
+	BPM      uint8
+	SequenceLen int
+	PatternsLen int
+}
+
 // ModProject represents your input JSON structure.
 // Speed: Optional: 1-31 (0: default, always 6)
 // BPM: Optional: 32-255 (0: default, always 125)
@@ -54,8 +60,34 @@ type ModProject struct {
 	Title    string    `json:"title"`
 	Speed    uint8     `json:"speed"`
 	BPM      uint8     `json:"bpm"`
-	Sequence []uint8   `json:"sequence"`
+	Sequence []uint8   `json:"orderList"`
 	Patterns []Pattern `json:"patterns"`
+}
+
+func ModProjectFactory() ModProject {
+	return ModProject{
+		Title:    "A Song With No Name",
+		Speed:    DEFAULT_SPEED,
+		BPM:      DEFAULT_BPM,
+		Sequence: []uint8{0},
+		Patterns: []Pattern{Pattern{}},
+	}
+}
+
+func (re ModProject) ModInfoFactory() ModInfo {
+	return ModInfo{
+		Title: re.Title,
+		Speed: re.Speed,
+		BPM: re.BPM,
+		SequenceLen: len(re.Sequence),
+		PatternsLen: len(re.Patterns),
+	}
+}
+
+func (re ModProject) IsOrderListValid() bool {
+	// TODO: check that each entry in the order list refers to
+	// a pattern.
+	return true
 }
 
 // Parse Note - Validate and map note to period
