@@ -8,7 +8,7 @@ V_TAG = $(shell git tag --list 'v*' | head -n1)
 VERSION = $(if $(V_TAG),$(V_TAG),v0.0.0)
 
 BUILD_DATE = $(shell date +%Y%m%d)
-BUILD_TIMESTAMP = $(shell date +%Y%m%dT%H%M%SZ)
+BUILD_TIMESTAMP = $(shell date +%Y%m%dT%H%M00Z)
 CKSUM_SCRIPT = import hashlib; print(hashlib.sha1(open('./$(APP_BINARY)','rb').read()).hexdigest())
 
 BUILD_ENV=CGO_ENABLED=0
