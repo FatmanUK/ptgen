@@ -41,7 +41,10 @@ func (re ModProject) ModInfoFactory() ModInfo {
 }
 
 func (re ModProject) IsOrderListValid() bool {
-	// TODO: check that each entry in the order list refers to
-	// a pattern.
+	for _, j := range re.Sequence {
+		if int(j) >= len(re.Patterns) {
+			return false
+		}
+	}
 	return true
 }

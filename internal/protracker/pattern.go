@@ -33,6 +33,6 @@ func (re Pattern) EmplaceRow(r uint16, m []string) (Pattern, error) {
 	return re, nil
 }
 
-func IsTooManyPatterns(numPatterns int) bool {
+func IsTooManyPatterns(numPatterns uint) bool {
 	return numPatterns > MAX_PATTERNS
 }
