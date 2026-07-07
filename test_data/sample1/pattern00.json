@@ -1,0 +1,1414 @@
+{
+  "patterns": [
+    [
+      [
+        {
+          "note": "C-4",
+          "instrument": 1,
+          "effect": "F05"
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": "F96"
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "E-4",
+          "instrument": 1,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ],
+      [
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        },
+        {
+          "note": "",
+          "instrument": 0,
+          "effect": ""
+        }
+      ]
+    ]
+  ]
+}
