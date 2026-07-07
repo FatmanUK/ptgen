@@ -2,6 +2,8 @@ package main
 
 const docoptString = `{{ .Name }} {{ .Version }}
 
+Outputs the binary data directly to stdout, so redirect it into a file.
+
 Usage:
   {{ .Name }} [-m <metadata>] [-o <orderlist>] -p <patterns>
   {{ .Name }} -h | --help
@@ -12,7 +14,7 @@ Options:
   -v --version    Show version
   -m <metadata>   Metadata input file
   -o <orderlist>  Order list input file
-  -p <patterns>   Patterns file or directory
+  -p <patterns>   Patterns directory
 `
 
 var APP_NAME string = "badvalue"
