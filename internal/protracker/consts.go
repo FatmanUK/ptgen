@@ -3,6 +3,7 @@ package protracker
 // These are just defaults.
 const DEFAULT_SPEED = 6
 const DEFAULT_BPM   = 125
+const MAX_PATTERNS  = 128  // or 64 ? Gemini seems undecided.
 
 // These can be changed, if you don't want PT compatibility.
 const ROWS_PER_PATTERN = 64

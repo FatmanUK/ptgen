@@ -10,7 +10,6 @@ import (
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
 
-// Just one function exported:
 // func WriteMod(w io.Writer, proj *ModProject) error
 // WriteMod compiles proj into a binary ProTracker file stream.
 // Populate proj, run WriteMod and the file appears in w.
@@ -26,68 +25,6 @@ var periodMap = map[string]uint16{
 	"C-5": 214, "C#5": 202, "D-5": 190, "D#5": 180,
 	"E-5": 170, "F-5": 160, "F#5": 151, "G-5": 143,
 	"G#5": 135, "A-5": 127, "A#5": 120, "B-5": 113,
-}
-
-// A Cell represents one channel on one row.
-// Note: e.g., "C-4" or "---" or ""
-// Instrument: 1-31 (0 means no instrument)
-// Effect: e.g., "C40", "047", "F03", or ""
-type Cell struct {
-	Note       string `json:"note"`
-	Instrument uint8  `json:"instrument"`
-	Effect     string `json:"effect"`
-}
-
-// A Row contains exactly CHANNELS_PER_ROW channels.
-type Row [CHANNELS_PER_ROW]Cell
-
-// A Pattern is a slice of ROWS_PER_PATTERN Rows.
-type Pattern [ROWS_PER_PATTERN]Row
-
-type ModInfo struct {
-	Title    string
-	Speed    uint8
-	BPM      uint8
-	SequenceLen int
-	PatternsLen int
-}
-
-// ModProject represents your input JSON structure.
-// Speed: Optional: 1-31 (0: default, always 6)
-// BPM: Optional: 32-255 (0: default, always 125)
-// Patterns: a slice of Patterns
-type ModProject struct {
-	Title    string    `json:"title"`
-	Speed    uint8     `json:"speed"`
-	BPM      uint8     `json:"bpm"`
-	Sequence []uint8   `json:"orderList"`
-	Patterns []Pattern `json:"patterns"`
-}
-
-func ModProjectFactory() ModProject {
-	return ModProject{
-		Title:    "A Song With No Name",
-		Speed:    DEFAULT_SPEED,
-		BPM:      DEFAULT_BPM,
-		Sequence: []uint8{0},
-		Patterns: []Pattern{Pattern{}},
-	}
-}
-
-func (re ModProject) ModInfoFactory() ModInfo {
-	return ModInfo{
-		Title: re.Title,
-		Speed: re.Speed,
-		BPM: re.BPM,
-		SequenceLen: len(re.Sequence),
-		PatternsLen: len(re.Patterns),
-	}
-}
-
-func (re ModProject) IsOrderListValid() bool {
-	// TODO: check that each entry in the order list refers to
-	// a pattern.
-	return true
 }
 
 // Parse Note - Validate and map note to period
