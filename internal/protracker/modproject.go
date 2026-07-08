@@ -1,9 +1,9 @@
 package protracker
 
 type ModInfo struct {
-	Title    string
-	Speed    uint8
-	BPM      uint8
+	Title       string
+	Speed       uint8
+	BPM         uint8
 	SequenceLen uint8
 	PatternsLen uint8
 }
@@ -32,9 +32,9 @@ func ModProjectFactory() ModProject {
 
 func (re ModProject) ModInfoFactory() ModInfo {
 	return ModInfo{
-		Title: re.Title,
-		Speed: re.Speed,
-		BPM: re.BPM,
+		Title:       re.Title,
+		Speed:       re.Speed,
+		BPM:         re.BPM,
 		SequenceLen: uint8(len(re.Sequence)),
 		PatternsLen: uint8(len(re.Patterns)),
 	}

@@ -21,13 +21,13 @@ func RowRegexFactory() string {
 	instRgx := `[0-F-]{2}`
 	efftRgx := `[0-Z-][0-Z-][0-Z-]` // ? TODO refine this one
 	cellRgx := fmt.Sprintf(`%s %s %s|%s %s|\.\.\.|---|-`,
-			noteRgx, instRgx, efftRgx, noteRgx, instRgx)
+		noteRgx, instRgx, efftRgx, noteRgx, instRgx)
 	sepRgx := `[:|]`
 	rgFmt := `(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s?`
 	return fmt.Sprintf(rgFmt,
-			rowRgx, sepRgx, cellRgx, sepRgx,
-			cellRgx, sepRgx, cellRgx, sepRgx,
-			cellRgx, sepRgx)
+		rowRgx, sepRgx, cellRgx, sepRgx,
+		cellRgx, sepRgx, cellRgx, sepRgx,
+		cellRgx, sepRgx)
 }
 
 // I could have left the row index out of this, but Rows are never

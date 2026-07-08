@@ -1,21 +1,21 @@
 package main
 
 import (
-	"encoding/binary"
-	"encoding/json"
-	"path/filepath"
-	"gopkg.in/yaml.v3"
-	"os"
-	"io"
-	"fmt"
-	"log"
 	"bufio"
 	"bytes"
-	"regexp"
+	"encoding/binary"
+	"encoding/json"
 	"errors"
-	"strings"
-	pt "ptgen/internal/protracker"
+	"fmt"
 	doh "github.com/FatmanUK/fatgo/docopt_helpers"
+	"gopkg.in/yaml.v3"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
+	pt "ptgen/internal/protracker"
+	"regexp"
+	"strings"
 )
 
 const metadataString = `Mod metadata:
@@ -29,9 +29,9 @@ Unique patterns: {{ .PatternsLen }}
 Order length:    {{ .SequenceLen }}`
 
 type PatternScanData struct {
-	pattern pt.Pattern
-	scanner *bufio.Scanner
-	regex *regexp.Regexp
+	pattern   pt.Pattern
+	scanner   *bufio.Scanner
+	regex     *regexp.Regexp
 	isHexRows bool
 }
 
@@ -42,7 +42,7 @@ func panicIfNotNil(err error) {
 }
 
 func scanLoop(logs chan string, d *PatternScanData,
-		rowsRead *uint) (pt.Pattern, error) {
+	rowsRead *uint) (pt.Pattern, error) {
 	for d.scanner.Scan() {
 		m := d.regex.FindStringSubmatch(d.scanner.Text())
 		if len(m) != 0 {
@@ -65,13 +65,13 @@ func scanLoop(logs chan string, d *PatternScanData,
 }
 
 func readPattern(file io.Reader, logs chan string,
-		isHexRows bool) (pt.Pattern, error) {
+	isHexRows bool) (pt.Pattern, error) {
 	var rowsRead uint = 0
 	var err error
 	data := PatternScanData{
-		pattern: pt.PatternFactory(),
-		scanner: bufio.NewScanner(file),
-		regex: regexp.MustCompile(pt.RowRegexFactory()),
+		pattern:   pt.PatternFactory(),
+		scanner:   bufio.NewScanner(file),
+		regex:     regexp.MustCompile(pt.RowRegexFactory()),
 		isHexRows: isHexRows,
 	}
 	data.pattern, err = scanLoop(logs, &data, &rowsRead)
@@ -83,7 +83,7 @@ func readPattern(file io.Reader, logs chan string,
 }
 
 func readMetadata(proj *pt.ModProject, logs chan string,
-		file *os.File) (*pt.ModProject, error) {
+	file *os.File) (*pt.ModProject, error) {
 	var err error
 	content, err := io.ReadAll(file)
 	if err != nil {
@@ -118,7 +118,7 @@ func defaultOrderlist(proj *pt.ModProject) []uint8 {
 
 // The song metadata in JSON or YAML format, including order list.
 func populateMetadata(proj *pt.ModProject, logs chan string,
-		fileName string) error {
+	fileName string) error {
 	var err error
 	proj.Sequence = defaultOrderlist(proj)
 	if fileName != "<nil>" {
@@ -228,7 +228,7 @@ func isHexRowNotationDetected(path string) (bool, error) {
 }
 
 func loadPattern(logs chan string, fileName string,
-		isHexRows bool) (pt.Pattern, error) {
+	isHexRows bool) (pt.Pattern, error) {
 	var err error
 	var pattern pt.Pattern
 	file, err := os.Open(fileName)
@@ -261,7 +261,7 @@ func validatePatterns(path string) (uint8, error) {
 // No monolithic pattern files. Too annoying.
 // Requires the patterns formatted in plain text. Screw JSON.
 func populatePatterns(proj *pt.ModProject, logs chan string,
-		path string) error {
+	path string) error {
 	logs <- "Loading patterns."
 	numPatterns, err := validatePatterns(path)
 	isHex, err := isHexRowNotationDetected(path)
@@ -301,7 +301,7 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 }
 
 func threadGenerate(logs chan string, metaFile interface{},
-		patternsPath interface{}) {
+	patternsPath interface{}) {
 	defer close(logs)
 	var err error
 	proj := pt.ModProjectFactory()
@@ -325,7 +325,7 @@ func main() {
 	}
 	panicIfNotNil(err)
 	logs := make(chan string)
-	go threadGenerate(logs,	args["-m"], args["-p"])
+	go threadGenerate(logs, args["-m"], args["-p"])
 	for msg := range logs {
 		msgs := strings.Split(msg, "\\n")
 		for _, m := range removeEmptyStrings(msgs) {

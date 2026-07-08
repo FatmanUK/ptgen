@@ -73,7 +73,7 @@ func parseEffect(e string) (uint8, uint8, bool, error) {
 func packBytes(i uint8, p uint16, ec uint8, ep uint8) [4]byte {
 	var out [4]byte
 	// Byte 0: Instrument (upper 4 bits) | Period (upper 4 bits)
-	out[0] = (i & 0xF0) | uint8((p & 0x0F00)>>8)
+	out[0] = (i & 0xF0) | uint8((p&0x0F00)>>8)
 	// Byte 1: Period (lower 8 bits)
 	out[1] = uint8(p & 0x00FF)
 	// Byte 2: Instrument (lower 4 bits) | Effect Command (4 bits)

@@ -2,7 +2,7 @@ package main
 
 const docoptString = `{{ .Name }} {{ .Version }}
 
-Outputs the binary data directly to stdout, so redirect it into a file.
+Outputs the binary data directly to stdout, so redirect it to a file.
 
 Usage:
   {{ .Name }} [-m <metadata>] -p <patterns>
@@ -17,16 +17,16 @@ Options:
 `
 
 var APP_NAME string = "badvalue"
-var VERSION  string = "badvalue"
+var VERSION string = "badvalue"
 
 type DocOptVars struct {
-	Name string
+	Name    string
 	Version string
 }
 
 func DocOptVarsFactory() DocOptVars {
 	return DocOptVars{
-		Name: APP_NAME,
+		Name:    APP_NAME,
 		Version: VERSION,
 	}
 }

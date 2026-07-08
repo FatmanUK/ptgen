@@ -22,9 +22,9 @@ func CellFactory() Cell {
 
 func CellFromString(s string) (Cell, error) {
 	c := Cell{
-		Note: "---",
+		Note:       "---",
 		Instrument: 0,
-		Effect: "---",
+		Effect:     "---",
 	}
 	if s == "---" || s == "..." || s == "-" || s == "" {
 		return c, nil
