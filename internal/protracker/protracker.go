@@ -146,11 +146,11 @@ func prepareCommands(s uint8, b uint8) ([]string, error) {
 // Standard tracker empty signals are "", "000", or "---"
 // Add speed and BPM commands there, if specified
 // Return: number of commands injected
-func injectCommands(p *ModProject, i uint8, commands []string) int {
-	pattern := p.Patterns[i]
+func injectCommands(p *ModProject, i uint8, commands []string) uint8 {
+	pattern := &p.Patterns[i]
 	rowZero := &pattern[0]
-	cmdIdx := 0
-	for ch := 0; ch < 4 && cmdIdx < len(commands); ch++ {
+	var cmdIdx uint8 = 0
+	for ch := 0; ch < 4 && cmdIdx < uint8(len(commands)); ch++ {
 		eff := strings.TrimSpace(rowZero[ch].Effect)
 		if eff == "" || eff == "000" || eff == "---" {
 			rowZero[ch].Effect = commands[cmdIdx]
@@ -173,14 +173,15 @@ func injectInitialTempo(proj *ModProject) error {
 		return err
 	}
 	// Prepare the targets we need to inject
-	commandsToInject, err := prepareCommands(proj.Speed, proj.BPM)
+	commands, err := prepareCommands(proj.Speed, proj.BPM)
 	if err != nil {
 		return err
 	}
-	cmdIdx := injectCommands(proj, fstPttnIdx, commandsToInject)
+	cmdIdx := injectCommands(proj, fstPttnIdx, commands)
+
 	// If we still have commands left over, row 0 was
 	// too saturated with user effects
-	if cmdIdx < len(commandsToInject) {
+	if cmdIdx < uint8(len(commands)) {
 		return fmt.Errorf(MSG_ERR_EFFT_FULL, fstPttnIdx)
 	}
 	return nil
