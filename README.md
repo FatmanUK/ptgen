@@ -8,7 +8,7 @@ To be clear, by `.mod` file I mean an old-school 90s musical composition format.
 
 See works in progress:
   - https://github.com/FatmanUK/mod_cold_boot
-  - ~~https://github.com/FatmanUK/mod_signal_lost~~ nope --- no repo yet
+  - https://github.com/FatmanUK/mod_signal_lost
 
 ## Test
 
@@ -45,4 +45,5 @@ These files are in IFF format and AmigaOS doesn't use file extensions, so to mak
 
   - add instrument data?
   - target only ST-01 samples and auto-download them?
+    - how to specify looping? (forward-looping only btw)
   - warn if final mod is larger than 100KB (omg so huge!)
