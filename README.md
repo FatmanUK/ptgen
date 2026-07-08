@@ -11,16 +11,16 @@ See works in progress:
   - https://github.com/FatmanUK/mod_signal_lost
 
 ## Test
-
-❯ make test
+   
+       ❯ make test
 
 ## Build/Run
-
-❯ make build
+   
+       ❯ make build
 
 Then generate a test `.mod` with:
-
-❯ ./ptgen -p test_data/sample2 -m test_data/sample2/metadata.json -o test_data/sample2/orderlist.json >sample2.mod
+   
+       ❯ ./ptgen -p test_data/sample2 -m test_data/sample2/metadata.json -o test_data/sample2/orderlist.json >sample2.mod
 
 Note the `.mod` data is output directly to stdout, so redirect it or take a binary file in the face.
 
