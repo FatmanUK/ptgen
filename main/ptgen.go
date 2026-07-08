@@ -28,6 +28,10 @@ Pattern length:  64 rows (Len. 0x40h)
 Unique patterns: {{ .PatternsLen }}
 Order length:    {{ .SequenceLen }}`
 
+const MOD_TOO_BIG_BYTES = (50 * 1024)
+
+const MSG_WRN_TOO_BIG = "Warning: Mod is %d bytes. Typically, they're smaller than %d bytes. This is a very large mod."
+
 type PatternScanData struct {
 	pattern   pt.Pattern
 	scanner   *bufio.Scanner
@@ -288,14 +292,17 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	info := proj.ModInfoFactory()
 	output := mustPrepTemplate("output", metadataString, info)
 	logs <- string(output)
-	// TODO: add tests from testsuite ... here? or after WriteMod?
-	// not writing speed/bpm? not writing the defaults either?
-	// add a test for this
+	if len(proj.Title) > 20 { // title less than 21 bytes
+		return errors.New("title too long")
+	}
 	err = pt.WriteMod(&buf, proj)
 	if err != nil {
 		return err
 	}
-	// TODO: add tests from testsuite ... here? or after WriteMod?
+	if buf.Len() > MOD_TOO_BIG_BYTES {
+		logs <- fmt.Sprintf(MSG_WRN_TOO_BIG,
+			buf.Len(), MOD_TOO_BIG_BYTES)
+	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err
 }
