@@ -4,8 +4,8 @@ type ModInfo struct {
 	Title    string
 	Speed    uint8
 	BPM      uint8
-	SequenceLen int
-	PatternsLen int
+	SequenceLen uint8
+	PatternsLen uint8
 }
 
 // ModProject represents your input JSON structure.
@@ -16,7 +16,7 @@ type ModProject struct {
 	Title    string    `json:"title"`
 	Speed    uint8     `json:"speed"`
 	BPM      uint8     `json:"bpm"`
-	Sequence []uint8   `json:"orderList"`
+	Sequence []uint8   `json:"orderList" yaml:"orderList"`
 	Patterns []Pattern `json:"patterns"`
 }
 
@@ -35,8 +35,8 @@ func (re ModProject) ModInfoFactory() ModInfo {
 		Title: re.Title,
 		Speed: re.Speed,
 		BPM: re.BPM,
-		SequenceLen: len(re.Sequence),
-		PatternsLen: len(re.Patterns),
+		SequenceLen: uint8(len(re.Sequence)),
+		PatternsLen: uint8(len(re.Patterns)),
 	}
 }
 

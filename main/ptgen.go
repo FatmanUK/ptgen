@@ -20,13 +20,20 @@ import (
 
 const metadataString = `Mod metadata:
 Song Title:      {{ .Title }}
-Format:          4-channel MOD / ProTracker-compatible
+Format:          ProTracker-compatible MOD
+Channels:        4
 Speed:           {{ .Speed }}
 BPM:             {{ .BPM }}
-Channels:        4
 Pattern length:  64 rows (Len. 0x40h)
 Unique patterns: {{ .PatternsLen }}
 Order length:    {{ .SequenceLen }}`
+
+type PatternScanData struct {
+	pattern pt.Pattern
+	scanner *bufio.Scanner
+	regex *regexp.Regexp
+	isHexRows bool
+}
 
 func panicIfNotNil(err error) {
 	if err != nil {
@@ -34,75 +41,106 @@ func panicIfNotNil(err error) {
 	}
 }
 
-func readJSON(proj *pt.ModProject,
-		file io.Reader) (*pt.ModProject, error) {
-	err := json.NewDecoder(file).Decode(proj)
-	return proj, err
-}
-
-func readYAML(proj *pt.ModProject,
-		file io.Reader) (*pt.ModProject, error) {
-	err := yaml.NewDecoder(file).Decode(proj)
-	return proj, err
-}
-
-func emplaceRow(pattern *pt.Pattern, logs chan string,
-		matches []string, isHexRows bool) error {
-	rowNum, err := rowNumFromRowStr(matches[1], isHexRows)
-	if err != nil {
-		return err
-	}
-	*pattern, err = pattern.EmplaceRow(rowNum, matches)
-	if err != nil {
-		return err
-	}
-	logs <- "Row " + pattern[rowNum].StringFromRow(rowNum)
-	return nil
-}
-
-func readTXT(file io.Reader, logs chan string,
-		isHexRows bool) (interface{}, error) {
-	pattern := pt.PatternFactory()
-	re := regexp.MustCompile(pt.RowRegexFactory())
-	scanner := bufio.NewScanner(file)
-	rowsRead := 0
-	for scanner.Scan() {
-		matches := re.FindStringSubmatch(scanner.Text())
-		if len(matches) == 0 {
-			continue
+func scanLoop(logs chan string, d *PatternScanData,
+		rowsRead *uint) (pt.Pattern, error) {
+	for d.scanner.Scan() {
+		m := d.regex.FindStringSubmatch(d.scanner.Text())
+		if len(m) != 0 {
+			*rowsRead++
+			n, err := rowNumFromRowStr(m[1], d.isHexRows)
+			if err != nil {
+				return d.pattern, err
+			}
+			d.pattern, err = d.pattern.EmplaceRow(n, m)
+			if err != nil {
+				return d.pattern, err
+			}
+			logs <- ">" + d.pattern[n].StringFromRow(n)
+			if err != nil {
+				return d.pattern, err
+			}
 		}
-		rowsRead++
-		err := emplaceRow(&pattern, logs, matches, isHexRows)
-		if err != nil {
-			return pattern, err
-		}
+	}
+	return d.pattern, nil
+}
+
+func readPattern(file io.Reader, logs chan string,
+		isHexRows bool) (pt.Pattern, error) {
+	var rowsRead uint = 0
+	var err error
+	data := PatternScanData{
+		pattern: pt.PatternFactory(),
+		scanner: bufio.NewScanner(file),
+		regex: regexp.MustCompile(pt.RowRegexFactory()),
+		isHexRows: isHexRows,
+	}
+	data.pattern, err = scanLoop(logs, &data, &rowsRead)
+	if err != nil {
+		return data.pattern, err
 	}
 	logs <- fmt.Sprintf("Total rows processed: %d", rowsRead)
-	return pattern, scanner.Err()
+	return data.pattern, data.scanner.Err()
 }
 
-// The song metadata in JSON or YAML format.
+func readMetadata(proj *pt.ModProject, logs chan string,
+		file *os.File) (*pt.ModProject, error) {
+	var err error
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return proj, err
+	}
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		return proj, err
+	}
+	if json.Valid(content) {
+		logs <- "JSON metadata detected"
+		err = json.NewDecoder(file).Decode(proj)
+	} else {
+		var node yaml.Node
+		err = yaml.Unmarshal(content, &node)
+		if err == nil {
+			logs <- "YAML metadata detected"
+			err = yaml.NewDecoder(file).Decode(proj)
+		}
+	}
+	return proj, err
+}
+
+func defaultOrderlist(proj *pt.ModProject) []uint8 {
+	var orderList []uint8
+	p := len(proj.Patterns)
+	for n := 0; n < p; n++ {
+		orderList = append(orderList, uint8(n))
+	}
+	return orderList
+}
+
+// The song metadata in JSON or YAML format, including order list.
 func populateMetadata(proj *pt.ModProject, logs chan string,
 		fileName string) error {
 	var err error
+	proj.Sequence = defaultOrderlist(proj)
 	if fileName != "<nil>" {
-		logs <- "Loading metadata."
+		logs <- "Loading metadata and pattern order."
 		file, err := os.Open(fileName)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
-		if strings.HasSuffix(fileName, ".json") {
-			proj, err = readJSON(proj, file)
-		} else if strings.HasSuffix(fileName, ".yaml") {
-			proj, err = readYAML(proj, file)
+		proj, err = readMetadata(proj, logs, file)
+		if err != nil {
+			return err
 		}
+	}
+	if !proj.IsOrderListValid() {
+		err = errors.New("Invalid order list")
 	}
 	return err
 }
 
-func countPatterns(path string) (uint, error) {
-	var count uint = 0
+func countPatterns(path string) (uint8, error) {
+	var count uint8 = 0
 	var err error
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -121,30 +159,32 @@ func countPatterns(path string) (uint, error) {
 	return count, nil
 }
 
+func locateFile(expected string, entries []os.DirEntry) bool {
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if entry.Name() == expected {
+			return true
+		}
+	}
+	return false
+}
+
 // check all required pattern files exist
-func isSequentialPatterns(path string, count uint) bool {
+func isSequentialPatterns(path string, count uint8) error {
 	var err error
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return false
+		return err
 	}
-	for c := 0; uint(c) < count; c++ {
-		expectedName := fmt.Sprintf("pattern%02x.txt", c)
-		isFound := false
-		for _, entry := range entries {
-			if entry.IsDir() {
-				continue
-			}
-			if entry.Name() == expectedName {
-				isFound = true
-				break
-			}
-		}
-		if !isFound {
-			return false
+	for c := 0; uint8(c) < count; c++ {
+		expected := fmt.Sprintf("pattern%02x.txt", c)
+		if !locateFile(expected, entries) {
+			return errors.New("patterns not sequential")
 		}
 	}
-	return true
+	return nil
 }
 
 // Row notation must be consistent across pattern files, but I don't
@@ -174,13 +214,12 @@ func isHexRowNotationDetected(path string) (bool, error) {
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			line := scanner.Text()
-			matchesRow := reRow.FindStringSubmatch(line)
-			if len(matchesRow) == 0 {
+			mRow := reRow.FindStringSubmatch(line)
+			if len(mRow) == 0 {
 				continue
 			}
-			matchesHex := reHex.FindStringSubmatch(
-					matchesRow[1])
-			if len(matchesHex) > 0 {
+			mHex := reHex.FindStringSubmatch(mRow[1])
+			if len(mHex) > 0 {
 				return true, nil
 			}
 		}
@@ -188,87 +227,58 @@ func isHexRowNotationDetected(path string) (bool, error) {
 	return false, nil
 }
 
-func loadPattern(logs chan string, fileBase string,
+func loadPattern(logs chan string, fileName string,
 		isHexRows bool) (pt.Pattern, error) {
 	var err error
 	var pattern pt.Pattern
-	fileName := fmt.Sprintf("%s.txt", fileBase)
 	file, err := os.Open(fileName)
 	if err != nil {
 		return pt.PatternFactory(), err
 	}
 	defer file.Close()
 	var p interface{}
-	p, err = readTXT(file, logs, isHexRows)
+	p, err = readPattern(file, logs, isHexRows)
 	pattern = p.(pt.Pattern)
 	return pattern, err
+}
+
+func validatePatterns(path string) (uint8, error) {
+	numPttns, err := countPatterns(path)
+	if err != nil {
+		return numPttns, err
+	}
+	err = pt.IsTooManyPatterns(numPttns)
+	if err != nil {
+		return numPttns, err
+	}
+	err = isSequentialPatterns(path, numPttns)
+	if err != nil {
+		return numPttns, err
+	}
+	return numPttns, nil
 }
 
 // No monolithic pattern files. Too annoying.
 // Requires the patterns formatted in plain text. Screw JSON.
 func populatePatterns(proj *pt.ModProject, logs chan string,
 		path string) error {
-	var err error
 	logs <- "Loading patterns."
-	numPatterns, err := countPatterns(path)
-	if err != nil {
-		return err
-	}
-	if pt.IsTooManyPatterns(numPatterns) {
-		return errors.New("too many patterns")
-	}
-	if !isSequentialPatterns(path, numPatterns) {
-		return errors.New("patterns not sequential")
-	}
-	isHexRows, err := isHexRowNotationDetected(path)
+	numPatterns, err := validatePatterns(path)
+	isHex, err := isHexRowNotationDetected(path)
 	if err != nil {
 		return err
 	}
 	patterns := make([]pt.Pattern, numPatterns)
-	for pIdx := range patterns {
-		fileBase := fmt.Sprintf("pattern%02x", pIdx)
-		logs <- fmt.Sprintf("Loading %s.", fileBase)
-		filePathBase := filepath.Join(path, fileBase)
-		patterns[pIdx], err = loadPattern(logs, filePathBase,
-				isHexRows)
+	for i := range patterns {
+		fileName := fmt.Sprintf("pattern%02x.txt", i)
+		fullPath := filepath.Join(path, fileName)
+		logs <- fmt.Sprintf("Loading %s.", fileName)
+		patterns[i], err = loadPattern(logs, fullPath, isHex)
 		if err != nil {
 			return err
 		}
 	}
 	proj.Patterns = patterns
-	return err
-}
-
-func defaultOrderlist(proj *pt.ModProject) []uint8 {
-	var orderList []uint8
-	p := len(proj.Patterns)
-	for n := 0; n < p; n++ {
-		orderList = append(orderList, uint8(n))
-	}
-	return orderList
-}
-
-// A pattern order list formatted in JSON.
-func populateOrderlist(proj *pt.ModProject, logs chan string,
-		fileName string) error {
-	var err error
-	if fileName != "<nil>" {
-		logs <- "Loading order list."
-		file, err := os.Open(fileName)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		proj, err = readJSON(proj, file)
-		if err != nil {
-			return err
-		}
-	} else {
-		proj.Sequence = defaultOrderlist(proj)
-	}
-	if !proj.IsOrderListValid() {
-		err = errors.New("Invalid order list")
-	}
 	return err
 }
 
@@ -291,18 +301,15 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 }
 
 func threadGenerate(logs chan string, metaFile interface{},
-		orderFile interface{}, patternsPath interface{}) {
+		patternsPath interface{}) {
 	defer close(logs)
 	var err error
 	proj := pt.ModProjectFactory()
-	meta := stringFromInterface(metaFile)
-	err = populateMetadata(&proj, logs, meta)
-	panicIfNotNil(err)
 	pttns := stringFromInterface(patternsPath)
 	err = populatePatterns(&proj, logs, pttns)
 	panicIfNotNil(err)
-	orderList := stringFromInterface(orderFile)
-	err = populateOrderlist(&proj, logs, orderList)
+	meta := stringFromInterface(metaFile)
+	err = populateMetadata(&proj, logs, meta)
 	panicIfNotNil(err)
 	err = outputEverything(&proj, logs)
 	panicIfNotNil(err)
@@ -318,7 +325,7 @@ func main() {
 	}
 	panicIfNotNil(err)
 	logs := make(chan string)
-	go threadGenerate(logs,	args["-m"], args["-o"], args["-p"])
+	go threadGenerate(logs,	args["-m"], args["-p"])
 	for msg := range logs {
 		msgs := strings.Split(msg, "\\n")
 		for _, m := range removeEmptyStrings(msgs) {

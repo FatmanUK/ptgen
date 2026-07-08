@@ -1,5 +1,9 @@
 package protracker
 
+import (
+	"errors"
+)
+
 // A Pattern is a slice of ROWS_PER_PATTERN Rows.
 type Pattern [ROWS_PER_PATTERN]Row
 
@@ -33,6 +37,9 @@ func (re Pattern) EmplaceRow(r uint16, m []string) (Pattern, error) {
 	return re, nil
 }
 
-func IsTooManyPatterns(numPatterns uint) bool {
-	return numPatterns > MAX_PATTERNS
+func IsTooManyPatterns(numPatterns uint8) error {
+	if numPatterns > MAX_PATTERNS {
+		return errors.New("too many patterns")
+	}
+	return nil
 }
