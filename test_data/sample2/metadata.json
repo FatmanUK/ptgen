@@ -1,1 +1,13 @@
-{"title":"Sample Song","speed":8,"bpm":145}
+{
+  "title": "Sample Song",
+  "speed": 8,
+  "bpm": 145,
+  "orderList": [
+    0,
+    1,
+    2,
+    1,
+    2,
+    3
+  ]
+}
