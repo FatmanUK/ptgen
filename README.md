@@ -8,7 +8,21 @@ To be clear, by `.mod` file I mean an old-school 90s musical composition format.
 
 See works in progress:
   - https://github.com/FatmanUK/mod_cold_boot
-  - ~~https://github.com/FatmanUK/mod_signal_lost~~ no repo yet
+  - ~~https://github.com/FatmanUK/mod_signal_lost~~ nope --- no repo yet
+
+## Test
+
+❯ make test
+
+## Build/Run
+
+❯ make build
+
+Then generate a test `.mod` with:
+
+❯ ./ptgen -p test_data/sample2 -m test_data/sample2/metadata.json -o test_data/sample2/orderlist.json >sample2.mod
+
+Note the `.mod` data is output directly to stdout, so redirect it or take a binary file in the face.
 
 ## Samples
 
