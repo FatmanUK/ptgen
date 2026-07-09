@@ -10,19 +10,30 @@ See works in progress:
   - https://github.com/FatmanUK/mod_cold_boot
   - https://github.com/FatmanUK/mod_signal_lost
 
-## Test
+## Lint/Test
    
-       ❯ make test
+    ❯ make lint
+    ❯ make test
 
-## Build/Run
+## Build
    
-       ❯ make build
+    ❯ make build
+    ❯ make run
+
+## Podman
+   
+    ❯ make podman-build
+    ❯ make podman-run
+    ❯ podman pull ghcr.io/fatmanuk/ptgen
+
+## Run
 
 Then generate a test `.mod` with:
    
-       ❯ ./ptgen -p test_data/sample2 -m test_data/sample2/metadata.json -o test_data/sample2/orderlist.json >sample2.mod
+    ❯ <test_data/sample2/metadata.json ./ptgen -p test_data/sample2 \
+      -m /dev/stdin >/tmp/sample2.mod
 
-Note the `.mod` data is output directly to stdout, so redirect it or take a binary file in the face.
+Note the `.mod` data is output directly to stdout, so you must redirect it. I did that because it simplifies the command syntax and feels more "Unix-y".
 
 ## Samples
 
@@ -30,16 +41,16 @@ I'm currently using samples from ST-01. They're tiny *and* sound good. Besides, 
 
 To get the ST-01 archive on Debian-based Linux, issue these commands:
    
-       sudo apt update
-       sudo apt install lhasa wget
-       mkdir samples
-       cd samples
-       wget -O st-01.lha https://aminet.net/mods/inst/st-01.lha
-       lha x st-01.lha
+    ❯ sudo apt update
+    ❯ sudo apt install lhasa wget
+    ❯ mkdir samples
+    ❯ cd samples
+    ❯ wget -O st-01.lha https://aminet.net/mods/inst/st-01.lha
+    ❯ lha x st-01.lha
 
 These files are in IFF format and AmigaOS doesn't use file extensions, so to make MilkyTracker see them you have to rename the ones you want with '.iff' extensions. Like this:
    
-       mv Stabs Stabs.iff
+    ❯ mv Stabs Stabs.iff
 
 ## Future Improvements
 

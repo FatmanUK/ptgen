@@ -38,7 +38,7 @@ build: mod-download
 
 # Run unit tests
 test:
-	$(GO) test -v ./...
+	$(GO) test -cover -race -v ./...
 
 # Lint code
 lint:
