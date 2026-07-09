@@ -14,10 +14,10 @@ const CHANNELS_PER_ROW = 4
 const MAGIC_BYTES = `M.K.`
 
 // Regexes.
-const RGX_ROWNUM = `[0-F]{2}`
+const RGX_ROWNUM = `[0-9A-F]{2}`
 const RGX_NOTE = `[A-G-][-#][3-5-]`
-const RGX_INSTR = `[0-F-]{2}`
-const RGX_EFFECT = `[0-Z-][0-Z-][0-Z-]` // ? TODO refine this one
+const RGX_INSTR = `[0-9A-F-]{2}`
+const RGX_EFFECT = `[0-9A-F-][0-9A-F-][0-9A-F-]`
 const RGX_CELL = `%s %s %s|%s %s|\.\.\.|---|-`
 const RGX_CELL_SEPARATOR = `[:|]`
 const RGX_ROW = `(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s?`

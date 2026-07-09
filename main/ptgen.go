@@ -155,7 +155,7 @@ func countPatterns(path string) (uint8, error) {
 		if entry.IsDir() {
 			continue
 		}
-		re := regexp.MustCompile(`pattern[0-F][0-F].txt`)
+		re := regexp.MustCompile(`pattern[0-9A-F][0-9A-F].txt`)
 		if len(re.FindStringSubmatch(entry.Name())) == 0 {
 			continue
 		}
@@ -192,44 +192,55 @@ func isSequentialPatterns(path string, count uint8) error {
 	return nil
 }
 
+func prepareRegexes() (*regexp.Regexp, *regexp.Regexp,
+	*regexp.Regexp) {
+	reRow := regexp.MustCompile(pt.RowRegexFactory())
+	reHex := regexp.MustCompile(`[A-Fa-f]`)
+	rePttn := regexp.MustCompile(`^pattern[0-9A-Fa-f]{2}\.txt$`)
+	return reRow, reHex, rePttn
+}
+
 // Row notation must be consistent across pattern files, but I don't
 // see a way to enforce it.
 func isHexRowNotationDetected(path string) (bool, error) {
-	var err error
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return false, err
 	}
-	reRow := regexp.MustCompile(pt.RowRegexFactory())
-	reHex := regexp.MustCompile(`[A-Fa-f]`)
+	reRow, reHex, rePttn := prepareRegexes()
 	for _, entry := range entries {
-		if entry.IsDir() {
+		name := entry.Name()
+		if entry.IsDir() || !rePttn.MatchString(name) {
 			continue
 		}
-		rePttn := regexp.MustCompile(`pattern[0-F][0-F].txt`)
-		if len(rePttn.FindStringSubmatch(entry.Name())) == 0 {
-			continue
-		}
-		fileName := filepath.Join(path, entry.Name())
-		file, err := os.Open(fileName)
+		filePath := filepath.Join(path, name)
+		detected, err := checkFileForHexRow(filePath,
+			reRow, reHex)
 		if err != nil {
 			return false, err
 		}
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := scanner.Text()
-			mRow := reRow.FindStringSubmatch(line)
-			if len(mRow) == 0 {
-				continue
-			}
-			mHex := reHex.FindStringSubmatch(mRow[1])
-			if len(mHex) > 0 {
-				return true, nil
-			}
+		if detected {
+			return true, nil
 		}
 	}
 	return false, nil
+}
+
+func checkFileForHexRow(filePath string, reRow *regexp.Regexp,
+	reHex *regexp.Regexp) (bool, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		mRow := reRow.FindStringSubmatch(scanner.Text())
+		if len(mRow) > 1 && reHex.MatchString(mRow[1]) {
+			return true, nil
+		}
+	}
+	return false, scanner.Err()
 }
 
 func loadPattern(logs chan string, fileName string,
