@@ -46,18 +46,18 @@ func parseEffect(e string) (uint8, uint8, bool, error) {
 	// Ignore empty strings or std empty tracker representations
 	if e != "" && e != "000" && e != "---" {
 		if len(e) != 3 {
-			errEffect = fmt.Errorf(MSG_INV_EFFT, e)
+			errEffect = fmt.Errorf(ERR_CELL_EFFT, e)
 			return 0, 0, false, errEffect
 		}
 		cmdVal, err := strconv.ParseUint(e[0:1], 16, 8)
 		if err != nil {
-			errEffect = fmt.Errorf(MSG_INV_CMMD, e)
+			errEffect = fmt.Errorf(ERR_CELL_EFFT_CMMD, e)
 			return 0, 0, false, errEffect
 		}
 		cmd = uint8(cmdVal)
 		paramVal, err := strconv.ParseUint(e[1:3], 16, 8)
 		if err != nil {
-			errEffect = fmt.Errorf(MSG_INV_PARM, e)
+			errEffect = fmt.Errorf(ERR_CELL_EFFT_PARM, e)
 			return 0, 0, false, errEffect
 		}
 		param = uint8(paramVal)
@@ -93,12 +93,12 @@ func encodeCell(c Cell) ([4]byte, error) {
 	var isValid bool
 	period, isValid = parseNote(c.Note)
 	if !isValid {
-		return out, fmt.Errorf(MSG_INV_NOTE, c.Note)
+		return out, fmt.Errorf(ERR_CELL_NOTE, c.Note)
 	}
 	// Instrument must be at least 1. 0 is reserved internally,
 	// but can be selected. (It just can't be set.)
 	if c.Instrument > 31 {
-		return out, fmt.Errorf(MSG_INV_INST, c.Instrument)
+		return out, fmt.Errorf(ERR_CELL_INST, c.Instrument)
 	}
 	cmd, param, isValid, err := parseEffect(c.Effect)
 	if !isValid {
@@ -110,16 +110,12 @@ func encodeCell(c Cell) ([4]byte, error) {
 
 func fstPttnValid(o []uint8, p []Pattern) (uint8, error) {
 	if len(o) == 0 {
-		return 0, errors.New(MSG_ERR_EMPTY_OLST)
+		return 0, errors.New(ERR_MOD_LIST_EMPTY)
 	}
 	// Identify the pattern that will play first in the order list
 	firstPatternIdx := o[0]
 	if int(firstPatternIdx) >= len(p) {
-		err := fmt.Errorf(MSG_ERR_OOB_PTTN, firstPatternIdx)
-		return firstPatternIdx, err
-	}
-	if len(p[firstPatternIdx]) == 0 {
-		err := fmt.Errorf(MSG_ERR_EMPTY_PTTN, firstPatternIdx)
+		err := fmt.Errorf(ERR_MOD_LIST_OOB, firstPatternIdx)
 		return firstPatternIdx, err
 	}
 	return firstPatternIdx, nil
@@ -129,13 +125,15 @@ func prepareCommands(s uint8, b uint8) ([]string, error) {
 	var commands []string
 	if s > 0 {
 		if s >= 32 {
-			return commands, fmt.Errorf(MSG_INV_SPD, s)
+			err := fmt.Errorf(ERR_CELL_EFFT_SPEED, s)
+			return commands, err
 		}
 		commands = append(commands, fmt.Sprintf("F%02X", s))
 	}
 	if b > 0 {
 		if b < 32 {
-			return commands, fmt.Errorf(MSG_INV_BPM, b)
+			err := fmt.Errorf(ERR_CELL_EFFT_BPM, b)
+			return commands, err
 		}
 		commands = append(commands, fmt.Sprintf("F%02X", b))
 	}
@@ -168,7 +166,7 @@ func injectInitialTempo(proj *ModProject) error {
 	if proj.Speed == 0 && proj.BPM == 0 {
 		return nil
 	}
-	fstPttnIdx, err := fstPttnValid(proj.Sequence, proj.Patterns)
+	fstPttnIdx, err := fstPttnValid(proj.OrderList, proj.Patterns)
 	if err != nil {
 		return err
 	}
@@ -182,7 +180,7 @@ func injectInitialTempo(proj *ModProject) error {
 	// If we still have commands left over, row 0 was
 	// too saturated with user effects
 	if cmdIdx < uint8(len(commands)) {
-		return fmt.Errorf(MSG_ERR_EFFT_FULL, fstPttnIdx)
+		return fmt.Errorf(ERR_PTTN_ZERO_FULL, fstPttnIdx)
 	}
 	return nil
 }
@@ -190,7 +188,7 @@ func injectInitialTempo(proj *ModProject) error {
 func writeCell(w io.Writer, row Row, p int, r int) error {
 	for cIdx, cell := range row {
 		encodedBytes, err := encodeCell(cell)
-		msgErr := fmt.Errorf(MSG_LOCATION, p, r, cIdx, err)
+		msgErr := fmt.Errorf(ERR_LOCATION, p, r, cIdx, err)
 		if err != nil {
 			return msgErr
 		}
@@ -211,10 +209,10 @@ func writeHeader(w io.Writer, proj *ModProject) {
 	for i := 0; i < 31; i++ {
 		w.Write(emptySample)
 	}
-	songLength := uint8(len(proj.Sequence))
+	songLength := uint8(len(proj.OrderList))
 	w.Write([]byte{songLength, 0x7F}) // Song length, Restart byte
 	sequenceTable := make([]byte, 128)
-	copy(sequenceTable, proj.Sequence)
+	copy(sequenceTable, proj.OrderList)
 	w.Write(sequenceTable)
 	// 4. Write Magic String
 	w.Write([]byte(MAGIC_BYTES))
@@ -224,9 +222,6 @@ func writePatterns(w io.Writer, proj *ModProject) error {
 	// 5. Write Patterns
 	//var err error
 	for pIdx, pattern := range proj.Patterns {
-		if len(pattern) != 64 {
-			return fmt.Errorf(MSG_INV_PTTN, pIdx)
-		}
 		for rIdx, row := range pattern {
 			err := writeCell(w, row, pIdx, rIdx)
 			if err != nil {
@@ -241,10 +236,10 @@ func writePatterns(w io.Writer, proj *ModProject) error {
 func WriteMod(w io.Writer, proj *ModProject) error {
 	err := injectInitialTempo(proj)
 	if err != nil {
-		return fmt.Errorf(MSG_ERR_INIT, err)
+		return fmt.Errorf(ERR_INJECT, err)
 	}
-	if len(proj.Sequence) == 0 || len(proj.Sequence) > 128 {
-		return errors.New(MSG_INV_OLST)
+	if !proj.IsOrderListValid() {
+		return errors.New(ERR_MOD_LIST)
 	}
 	writeHeader(w, proj)
 	err = writePatterns(w, proj)

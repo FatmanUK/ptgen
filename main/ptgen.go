@@ -25,8 +25,8 @@ Channels:        4
 Speed:           {{ .Speed }}
 BPM:             {{ .BPM }}
 Pattern length:  64 rows (Len. 0x40h)
-Unique patterns: {{ .PatternsLen }}
-Order length:    {{ .SequenceLen }}`
+Unique patterns: {{ .Patterns }}
+Order length:    {{ .OrderLen }}`
 
 const MOD_TOO_BIG_BYTES = (50 * 1024)
 
@@ -55,11 +55,12 @@ func scanLoop(logs chan string, d *PatternScanData,
 			if err != nil {
 				return d.pattern, err
 			}
-			d.pattern, err = d.pattern.EmplaceRow(n, m)
+			m2 := [4]string{ m[2], m[3], m[4], m[5] }
+			d.pattern, err = d.pattern.EmplaceRow(n, m2)
 			if err != nil {
 				return d.pattern, err
 			}
-			logs <- ">" + d.pattern[n].StringFromRow(n)
+			logs <- ">" + d.pattern[n].Save(n)
 			if err != nil {
 				return d.pattern, err
 			}
@@ -124,7 +125,7 @@ func defaultOrderlist(proj *pt.ModProject) []uint8 {
 func populateMetadata(proj *pt.ModProject, logs chan string,
 	fileName string) error {
 	var err error
-	proj.Sequence = defaultOrderlist(proj)
+	proj.OrderList = defaultOrderlist(proj)
 	if fileName != "<nil>" {
 		logs <- "Loading metadata and pattern order."
 		file, err := os.Open(fileName)

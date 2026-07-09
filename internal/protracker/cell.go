@@ -16,38 +16,49 @@ type Cell struct {
 }
 
 func CellFactory() Cell {
-	c, _ := CellFromString("--- -- ---")
-	return c
-}
-
-func CellFromString(s string) (Cell, error) {
-	c := Cell{
+	return Cell{
 		Note:       "---",
 		Instrument: 0,
 		Effect:     "---",
 	}
-	if s == "---" || s == "..." || s == "-" || s == "" {
-		return c, nil
-	}
-	c.Note = s[0:3]
-	i := s[4:6]
-	if i != "--" {
-		u, err := strconv.ParseUint(i, 16, 16)
-		if err != nil {
-			return c, err
-		}
-		c.Instrument = uint8(u)
-	}
-	if len(s) >= 10 {
-		c.Effect = s[7:10]
-	}
-	return c, nil
 }
 
-func (re Cell) StringFromCell() string {
-	instr := fmt.Sprintf("%02x", re.Instrument)
-	if instr == "00" {
-		instr = "--"
+func CellRegexFactory() string {
+	return fmt.Sprintf(RGX_CELL,
+		RGX_NOTE, RGX_INSTR, RGX_EFFECT,
+		RGX_NOTE, RGX_INSTR)
+}
+
+// Load: deserialise struct from a string
+func (c *Cell) Load(s string) error {
+	if s == "---" || s == "..." || s == "-" || s == "" {
+		return nil
 	}
-	return fmt.Sprintf("%s %s %s", re.Note, instr, re.Effect)
+	l := len(s)
+	if l >= 3 {
+		c.Note = s[0:3]
+	}
+	if l >= 6 {
+		i := s[4:6]
+		if i != "--" {
+			u, err := strconv.ParseUint(i, 16, 16)
+			if err != nil {
+				return err
+			}
+			c.Instrument = uint8(u)
+		}
+	}
+	if l >= 10 {
+		c.Effect = s[7:10]
+	}
+	return nil
+}
+
+// Save: serialise struct to a string
+func (c *Cell) Save() string {
+	i := fmt.Sprintf("%02x", c.Instrument)
+	if i == "00" {
+		i = "--"
+	}
+	return fmt.Sprintf("%s %s %s", c.Note, i, c.Effect)
 }

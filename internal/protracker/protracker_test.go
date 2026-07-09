@@ -105,15 +105,11 @@ func TestEncodeCell_Valid(t *testing.T) {
 			t.Parallel()
 			result, err := encodeCell(tt.input)
 			if err != nil {
-				t.Fatalf(MSG_ERR_FAILED,
-					err,
-				)
+				t.Fatalf(ERR_CELL_FAILED, err)
 			}
 			if result != tt.expected {
-				t.Errorf(MSG_ERR_EXPECTED,
-					tt.expected,
-					result,
-				)
+				t.Errorf(FMT_TST_VAR_X, tt.expected,
+					result)
 			}
 		})
 	}
@@ -134,42 +130,42 @@ func TestEncodeCell_Errors(t *testing.T) {
 	tests = append(tests, CellTestError{
 		name:        "Octave below limit (B-2)",
 		input:       cellTooLow,
-		expectedErr: "only octaves 3-5 allowed",
+		expectedErr: "Must be a valid note in octaves 3-5",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Octave above limit (C-6)",
 		input:       cellTooHigh,
-		expectedErr: "only octaves 3-5 allowed",
+		expectedErr: "Must be a valid note in octaves 3-5",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Invalid note format name",
 		input:       cellRedDwarfError,
-		expectedErr: "invalid note",
+		expectedErr: "Must be a valid note in octaves 3-5",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Instrument range overflow (>31)",
 		input:       cellInstrTooHigh,
-		expectedErr: "instrument 32 out of bounds",
+		expectedErr: "Instrument 32 is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Effect string length underflow",
 		input:       cellEffectTooShort,
-		expectedErr: "must be 3 hex chars",
+		expectedErr: "Must be 3 hex characters",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Effect string length overflow",
 		input:       cellEffectTooLong,
-		expectedErr: "must be 3 hex chars",
+		expectedErr: "Must be 3 hex characters",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Non-hex effect command byte",
 		input:       cellEffectWtf,
-		expectedErr: "invalid effect command",
+		expectedErr: "Invalid effect command",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Non-hex effect parameter bytes",
 		input:       cellEffectMangled,
-		expectedErr: "invalid effect parameter",
+		expectedErr: "Invalid effect parameter",
 	})
 
 	for _, tt := range tests {
@@ -178,16 +174,13 @@ func TestEncodeCell_Errors(t *testing.T) {
 			t.Parallel()
 			_, err := encodeCell(tt.input)
 			if err == nil {
-				t.Fatalf(MSG_ERR_FAIL_FAIL)
+				t.Fatalf(ERR_CELL_SUCCESS)
 			}
 			hasSubstr := strings.Contains(err.Error(),
-				tt.expectedErr,
-			)
+				tt.expectedErr)
 			if !hasSubstr {
-				t.Errorf(MSG_ERR_WRONG_ERROR,
-					tt.expectedErr,
-					err,
-				)
+				t.Errorf(ERR_CELL_WRONG_ERROR,
+					tt.expectedErr, err)
 			}
 		})
 	}
@@ -208,17 +201,17 @@ func TestWriteMod_Integration(t *testing.T) {
 	var tests []ModProjectTestError
 	mpCompliant := ModProject{
 		Title:    "Pro Validation",
-		Sequence: []uint8{0, 0, 1},
+		OrderList: []uint8{0, 0, 1},
 		Patterns: []Pattern{mockPattern, mockPattern},
 	}
 	mpEmptyOrderList := ModProject{
 		Title:    "Order List Too Short (Empty)",
-		Sequence: []uint8{},
+		OrderList: []uint8{},
 		Patterns: []Pattern{mockPattern},
 	}
 	mpOrderListTooLong := ModProject{
 		Title:    "Order List Too Long",
-		Sequence: make([]uint8, 129), // Cap is 128
+		OrderList: make([]uint8, 129), // Cap is 128
 		Patterns: []Pattern{mockPattern},
 	}
 	tests = append(tests, ModProjectTestError{
@@ -245,19 +238,18 @@ func TestWriteMod_Integration(t *testing.T) {
 
 			if tt.shouldFail {
 				if err == nil {
-					t.Errorf(MSG_ERR_FAIL_CRRPT)
+					t.Errorf(ERR_MOD_CORRUPT)
 				}
 				return
 			}
 
 			if err != nil {
-				t.Fatalf(MSG_ERR_FAIL_VALID, err)
+				t.Fatalf(ERR_MOD_FAILED, err)
 			}
 
 			// Size Assertion
 			if buf.Len() != tt.expectedLen {
-				t.Errorf(MSG_ERR_SIZE,
-					tt.expectedLen,
+				t.Errorf(ERR_MOD_SIZE, tt.expectedLen,
 					buf.Len(),
 				)
 			}
@@ -267,7 +259,7 @@ func TestWriteMod_Integration(t *testing.T) {
 			title := []byte("Pro Validation")
 			expTitle := append(title, make([]byte, 6)...)
 			if !bytes.Equal(outBytes[0:20], expTitle) {
-				t.Errorf(MSG_ERR_TITLE)
+				t.Errorf(ERR_MOD_TITLE_PAD)
 			}
 
 			// Validate Magic Marker Offset placement
@@ -276,7 +268,7 @@ func TestWriteMod_Integration(t *testing.T) {
 			// = Offset 1080
 			magicMarker := string(outBytes[1080:1084])
 			if magicMarker != MAGIC_BYTES {
-				t.Errorf(MSG_ERR_BAD_FMT, magicMarker)
+				t.Errorf(ERR_MOD_MAGIC, magicMarker)
 			}
 
 			// Sample header integrity loop check
@@ -285,7 +277,7 @@ func TestWriteMod_Integration(t *testing.T) {
 			for i := 0; i < 31; i++ {
 				offset := 20 + (i * 30) + 29
 				if outBytes[offset] != 0x01 {
-					t.Errorf(MSG_ERR_BAD_INS, i+1)
+					t.Errorf(ERR_MOD_INSTR, i+1)
 				}
 			}
 		})
