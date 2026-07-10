@@ -18,11 +18,12 @@ import (
 	"strings"
 )
 
-type PatternScanData struct {
+type ScanData struct {
 	pattern   pt.Pattern
 	scanner   *bufio.Scanner
 	regex     *regexp.Regexp
 	isHexRows bool
+	rowsRead  uint
 }
 
 func panicIfNotNil(err error) {
@@ -31,25 +32,25 @@ func panicIfNotNil(err error) {
 	}
 }
 
-func scanLoop(logs chan string, d *PatternScanData,
-	rowsRead *uint) (pt.Pattern, error) {
+func scanLoop(logs chan string, d *ScanData) (pt.Pattern, error) {
 	for d.scanner.Scan() {
 		m := d.regex.FindStringSubmatch(d.scanner.Text())
-		if len(m) != 0 {
-			*rowsRead++
-			n, err := rowNumFromRowStr(m[1], d.isHexRows)
-			if err != nil {
-				return d.pattern, err
-			}
-			m2 := [4]string{ m[2], m[3], m[4], m[5] }
-			d.pattern, err = d.pattern.EmplaceRow(n, m2)
-			if err != nil {
-				return d.pattern, err
-			}
-			logs <- ">" + d.pattern[n].Save(n)
-			if err != nil {
-				return d.pattern, err
-			}
+		if len(m) == 0 {
+			continue
+		}
+		d.rowsRead++
+		n, err := rowNumFromRowStr(m[1], d.isHexRows)
+		if err != nil {
+			return d.pattern, err
+		}
+		m2 := [4]string{m[2], m[3], m[4], m[5]}
+		d.pattern, err = d.pattern.EmplaceRow(n, m2)
+		if err != nil {
+			return d.pattern, err
+		}
+		logs <- fmt.Sprintf("%s", d.pattern[n].Save(n))
+		if err != nil {
+			return d.pattern, err
 		}
 	}
 	return d.pattern, nil
@@ -57,19 +58,19 @@ func scanLoop(logs chan string, d *PatternScanData,
 
 func readPattern(file io.Reader, logs chan string,
 	isHexRows bool) (pt.Pattern, error) {
-	var rowsRead uint = 0
 	var err error
-	data := PatternScanData{
+	data := ScanData{
 		pattern:   pt.PatternFactory(),
 		scanner:   bufio.NewScanner(file),
 		regex:     regexp.MustCompile(pt.RowRegexFactory()),
 		isHexRows: isHexRows,
+		rowsRead:  0,
 	}
-	data.pattern, err = scanLoop(logs, &data, &rowsRead)
+	data.pattern, err = scanLoop(logs, &data)
 	if err != nil {
 		return data.pattern, err
 	}
-	logs <- fmt.Sprintf("Total rows processed: %d", rowsRead)
+	logs <- fmt.Sprintf(MSG_TOTAL_ROWS_PROCESSED, data.rowsRead)
 	return data.pattern, data.scanner.Err()
 }
 
@@ -85,13 +86,13 @@ func readMetadata(proj *pt.ModProject, logs chan string,
 		return proj, err
 	}
 	if json.Valid(content) {
-		logs <- "JSON metadata detected"
+		logs <- MSG_JSON_DETECTED
 		err = json.NewDecoder(file).Decode(proj)
 	} else {
 		var node yaml.Node
 		err = yaml.Unmarshal(content, &node)
 		if err == nil {
-			logs <- "YAML metadata detected"
+			logs <- MSG_YAML_DETECTED
 			err = yaml.NewDecoder(file).Decode(proj)
 		}
 	}
@@ -113,7 +114,7 @@ func populateMetadata(proj *pt.ModProject, logs chan string,
 	var err error
 	proj.OrderList = defaultOrderlist(proj)
 	if fileName != "<nil>" {
-		logs <- "Loading metadata and pattern order."
+		logs <- MSG_LOADING_METADATA
 		file, err := os.Open(fileName)
 		if err != nil {
 			return err
@@ -125,7 +126,7 @@ func populateMetadata(proj *pt.ModProject, logs chan string,
 		}
 	}
 	if !proj.IsOrderListValid() {
-		err = errors.New("Invalid order list")
+		err = errors.New(ERR_MOD_OLST)
 	}
 	return err
 }
@@ -137,15 +138,11 @@ func countPatterns(path string) (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
+	re := regexp.MustCompile(RGX_PTTN_FILE)
 	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
+		if !entry.IsDir() && re.MatchString(entry.Name()) {
+			count++
 		}
-		re := regexp.MustCompile(`pattern[0-9A-F][0-9A-F].txt`)
-		if len(re.FindStringSubmatch(entry.Name())) == 0 {
-			continue
-		}
-		count++
 	}
 	return count, nil
 }
@@ -170,9 +167,9 @@ func isSequentialPatterns(path string, count uint8) error {
 		return err
 	}
 	for c := 0; uint8(c) < count; c++ {
-		expected := fmt.Sprintf("pattern%02x.txt", c)
+		expected := fmt.Sprintf(MSG_PTTN_FILE, c)
 		if !locateFile(expected, entries) {
-			return errors.New("patterns not sequential")
+			return errors.New(MSG_PTTN_NOT_SEQ)
 		}
 	}
 	return nil
@@ -181,8 +178,8 @@ func isSequentialPatterns(path string, count uint8) error {
 func prepareRegexes() (*regexp.Regexp, *regexp.Regexp,
 	*regexp.Regexp) {
 	reRow := regexp.MustCompile(pt.RowRegexFactory())
-	reHex := regexp.MustCompile(`[A-Fa-f]`)
-	rePttn := regexp.MustCompile(`^pattern[0-9A-Fa-f]{2}\.txt$`)
+	reHex := regexp.MustCompile(RGX_HEX_EVIDENCE)
+	rePttn := regexp.MustCompile(RGX_PTTN_FILE)
 	return reRow, reHex, rePttn
 }
 
@@ -264,17 +261,20 @@ func validatePatterns(path string) (uint8, error) {
 // Requires the patterns formatted in plain text. Screw JSON.
 func populatePatterns(proj *pt.ModProject, logs chan string,
 	path string) error {
-	logs <- "Loading patterns."
+	logs <- MSG_LOADING_PTTNS
 	numPatterns, err := validatePatterns(path)
+	if err != nil {
+		return err
+	}
 	isHex, err := isHexRowNotationDetected(path)
 	if err != nil {
 		return err
 	}
 	patterns := make([]pt.Pattern, numPatterns)
 	for i := range patterns {
-		fileName := fmt.Sprintf("pattern%02x.txt", i)
+		fileName := fmt.Sprintf(MSG_PTTN_FILE, i)
 		fullPath := filepath.Join(path, fileName)
-		logs <- fmt.Sprintf("Loading %s.", fileName)
+		logs <- fmt.Sprintf(MSG_LOADING_FILE, fileName)
 		patterns[i], err = loadPattern(logs, fullPath, isHex)
 		if err != nil {
 			return err
@@ -291,7 +291,7 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	output := mustPrepTemplate("output", metadataString, info)
 	logs <- string(output)
 	if len(proj.Title) > 20 { // title less than 21 bytes
-		return errors.New("title too long")
+		return errors.New(ERR_MOD_TITLE_LONG)
 	}
 	err = pt.WriteMod(&buf, proj)
 	if err != nil {
@@ -299,7 +299,7 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	}
 	if buf.Len() > MOD_TOO_BIG_BYTES {
 		logs <- fmt.Sprintf(MSG_WRN_TOO_BIG_KB,
-			buf.Len() / 1024, MOD_TOO_BIG_KB)
+			buf.Len()/1024, MOD_TOO_BIG_KB)
 	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err

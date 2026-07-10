@@ -200,19 +200,19 @@ func TestWriteMod_Integration(t *testing.T) {
 
 	var tests []ModProjectTestError
 	mpCompliant := ModProject{
-		Title:    "Pro Validation",
+		Title:     "Pro Validation",
 		OrderList: []uint8{0, 0, 1},
-		Patterns: []Pattern{mockPattern, mockPattern},
+		Patterns:  []Pattern{mockPattern, mockPattern},
 	}
 	mpEmptyOrderList := ModProject{
-		Title:    "Order List Too Short (Empty)",
+		Title:     "Order List Too Short (Empty)",
 		OrderList: []uint8{},
-		Patterns: []Pattern{mockPattern},
+		Patterns:  []Pattern{mockPattern},
 	}
 	mpOrderListTooLong := ModProject{
-		Title:    "Order List Too Long",
+		Title:     "Order List Too Long",
 		OrderList: make([]uint8, 129), // Cap is 128
-		Patterns: []Pattern{mockPattern},
+		Patterns:  []Pattern{mockPattern},
 	}
 	tests = append(tests, ModProjectTestError{
 		name:        "Standard compliant export compilation",
@@ -221,12 +221,12 @@ func TestWriteMod_Integration(t *testing.T) {
 		expectedLen: 1084 + (2 * 1024), // Header + 2 patterns
 	})
 	tests = append(tests, ModProjectTestError{
-		name:       "Reject sequence tracking length underflow",
+		name:       "Reject order tracking length underflow",
 		project:    mpEmptyOrderList,
 		shouldFail: true,
 	})
 	tests = append(tests, ModProjectTestError{
-		name:       "Reject sequence tracking length overflow",
+		name:       "Reject order tracking length overflow",
 		project:    mpOrderListTooLong,
 		shouldFail: true,
 	})

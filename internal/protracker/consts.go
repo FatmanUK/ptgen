@@ -14,16 +14,16 @@ const CHANNELS_PER_ROW = 4
 const MAGIC_BYTES = `M.K.`
 
 // Regexes.
-const RGX_ROWNUM = `[0-9A-F]{2}`
+const RGX_ROWNUM = `[0-9A-Fa-f]{2}`
 const RGX_NOTE = `[A-G-][-#][3-5-]`
 const RGX_INSTR = `[0-9A-F-]{2}`
-const RGX_EFFECT = `[0-9A-F-][0-9A-F-][0-9A-F-]`
+const RGX_EFFECT = `[0-9A-F-]{3}`
 const RGX_CELL = `%s %s %s|%s %s|\.\.\.|---|-`
 const RGX_CELL_SEPARATOR = `[:|]`
 const RGX_ROW = `(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s?`
 
 // Formatting patterns.
-const FMT_ROW_PRETTY = `%02x | %s | %s | %s | %s |`
+const FMT_ROW_PRETTY = `(%02x) %s | %s | %s | %s |`
 const FMT_TST_STRING = `Exp: "%s" Got: "%s"`
 const FMT_TST_NUMBER = `Exp: %d Got: %d`
 const FMT_TST_VAR = `Exp: "%v" Got: "%v"`
@@ -31,7 +31,6 @@ const FMT_TST_VAR_X = `\nExpected: [% X]\nGot:      [% X]`
 
 // Test data
 const TEST_ROW_ROWNUM = 42
-const TEST_ROW_STRING = `2a | --- -- --- | --- -- --- | --- -- --- | --- -- --- |`
 const TEST_CELL_STRING = `A#3 03 C38`
 
 // Error strings
@@ -92,8 +91,8 @@ const MSG_ROW_SAVE_OK = `Save output is ok.`
 const MSG_ROW_CELLS_OK = `Row has %d Cells.`
 const MSG_ROW_CELLX_OK = `Cell %d is ok.`
 
-const MSG_PTTN_NUM_OK = `Pattern quantity (%d) is ok.`  // awkward; can't find synonym
-const MSG_PTTN_NUM_NOK = `Pattern quantity (%d) is not ok.`  // awkward; can't find synonym
+const MSG_PTTN_NUM_OK = `Pattern quantity (%d) is ok.`      // awkward; can't find synonym
+const MSG_PTTN_NUM_NOK = `Pattern quantity (%d) is not ok.` // awkward; can't find synonym
 
 const MSG_MOD_TITLE_OK = `Title is ok.`
 const MSG_MOD_SPEED_OK = `Speed is ok.`

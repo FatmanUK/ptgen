@@ -1,8 +1,8 @@
 package protracker
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestRowFactory(t *testing.T) {
@@ -48,11 +48,15 @@ func TestRowRegexFactory(t *testing.T) {
 func TestRowSave(t *testing.T) {
 	r := RowFactory()
 	s := r.Save(TEST_ROW_ROWNUM)
-	if s == TEST_ROW_STRING {
+	emptyCell := CellFactory()
+	blank := emptyCell.Save()
+	expected := fmt.Sprintf(FMT_ROW_PRETTY, TEST_ROW_ROWNUM,
+		blank, blank, blank, blank)
+	if s == expected {
 		t.Logf(MSG_ROW_SAVE_OK)
 	} else {
 		m := fmt.Sprintf("%s %s", ERR_ROW_SAVE,
 			FMT_TST_STRING)
-		t.Errorf(m, TEST_ROW_STRING, s)
+		t.Errorf(m, expected, s)
 	}
 }

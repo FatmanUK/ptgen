@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
-	"bytes"
 	"text/template"
 )
 
