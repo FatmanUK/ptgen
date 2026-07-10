@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -12,23 +13,10 @@ type NumTests struct {
 
 func TestRemoveEmptyStrings(t *testing.T) {
 	testStrings := []string{
-		"",
-		"test",
-		"1234",
-		"",
-		"",
-		"5678",
-		"",
-		"blah",
-		"",
-		"",
+		"", "test", "1234", "", "",
+		"5678", "", "blah", "", "",
 	}
-	solution := []string{
-		"test",
-		"1234",
-		"5678",
-		"blah",
-	}
+	solution := []string{ "test", "1234", "5678", "blah" }
 	output := removeEmptyStrings(testStrings)
 	if compareSlices(output, solution) {
 		t.Logf(MSG_SLICES_OK)
