@@ -31,9 +31,10 @@ func TestRemoveEmptyStrings(t *testing.T) {
 	}
 	output := removeEmptyStrings(testStrings)
 	if compareSlices(output, solution) {
-		t.Logf("Output matches expected solution.")
+		t.Logf(MSG_SLICES_OK)
 	} else {
-		t.Errorf("Output doesn't match expected solution.")
+		m := fmt.Sprintf("%s %s", ERR_SLICES, FMT_TST_VAR)
+		t.Errorf(m, output, solution)
 	}
 }
 
@@ -44,9 +45,11 @@ func TestRowNumFromRowStr(t *testing.T) {
 	for _, test := range tests {
 		out, _ := rowNumFromRowStr(test.number, test.isHex)
 		if out == test.expected {
-			t.Logf("Output matches expected solution.")
+			t.Logf(MSG_ROW_NUM_OK)
 		} else {
-			t.Errorf("Output doesn't match expected solution. %d != %d", out, test.expected)
+			m := fmt.Sprintf("%s %s", ERR_ROW_NUM,
+				FMT_TST_NUMBER)
+			t.Errorf(m, out, test.expected)
 		}
 	}
 }

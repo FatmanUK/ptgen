@@ -298,8 +298,8 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 		return err
 	}
 	if buf.Len() > MOD_TOO_BIG_BYTES {
-		logs <- fmt.Sprintf(MSG_WRN_TOO_BIG,
-			buf.Len(), MOD_TOO_BIG_BYTES)
+		logs <- fmt.Sprintf(MSG_WRN_TOO_BIG_KB,
+			buf.Len() / 1024, MOD_TOO_BIG_KB)
 	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err

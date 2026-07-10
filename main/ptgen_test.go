@@ -19,9 +19,9 @@ func TestDefaultOrderlist(t *testing.T) {
 	proj.Patterns = []pt.Pattern{ pttn, pttn, pttn, pttn, pttn }
 	proj.OrderList = defaultOrderlist(&proj)
 	if proj.IsOrderListValid() {
-		t.Logf("Order list is ok,")
+		t.Logf(MSG_MOD_OLST_OK)
 	} else {
-		t.Errorf("Order list is wrong,")
+		t.Errorf(ERR_MOD_OLST)
 	}
 }
 
