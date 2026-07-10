@@ -1,5 +1,7 @@
 # ptgen
 
+[![BuildPush](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml)
+
 I wanted to "compile" my `.mod` file from plain text, so it could be almost entirely versioned by git. I don't have a firm plan for the samples or instruments, yet.
 
 `.mod` trackers (eg. MilkyTracker) are great, but they tend to use old-school DOS interfaces, and as such lack copy-n-paste. Entering notes (patterns) by hand in Milky is fun, but after a while it wears a bit. I'd rather enter the data in a modern text editor using a specific sparse format.
