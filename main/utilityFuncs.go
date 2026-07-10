@@ -7,12 +7,12 @@ import (
 	"text/template"
 )
 
-func compareStringSlices(a []string, b []string) bool {
+func compareSlices[T comparable](a []T, b []T) bool {
 	if len(a) != len(b) {
 		return false
 	}
 	for i := range a {
-		if a[i] != b[i] {
+		if !(a[i] == b[i]) {
 			return false
 		}
 	}

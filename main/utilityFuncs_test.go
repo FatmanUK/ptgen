@@ -10,10 +10,6 @@ type NumTests struct {
 	expected uint16
 }
 
-func TestCompareSlices(t *testing.T) {
-	//func compareSlices(a []string, b []string) bool
-}
-
 func TestRemoveEmptyStrings(t *testing.T) {
 	testStrings := []string{
 		"",
@@ -60,6 +56,11 @@ func TestTemplateFactory(t *testing.T) {
 	// func TemplateFactory(name string, format string) *template.Template
 }
 
+// Need to think about this some more.
 func TestMustPrepTemplate(t *testing.T) {
 	// func mustPrepTemplate(name string, formatString string, data any) []byte
+}
+
+func TestCompareSlices(t *testing.T) {
+	// func compareSlices[T comparable](a []T, b []T) bool
 }
