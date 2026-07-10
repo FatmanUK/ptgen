@@ -1,6 +1,6 @@
 # ptgen
 
-[![BuildPush](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml)
+[![Test-Build-Push](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml)
 
 I wanted to "compile" my `.mod` file from plain text, so it could be almost entirely versioned by git. I don't have a firm plan for the samples or instruments, yet.
 
