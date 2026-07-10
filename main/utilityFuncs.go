@@ -31,7 +31,7 @@ func removeEmptyStrings(s []string) []string {
 	return r
 }
 
-func stringFromInterface(any interface{}) string {
+func stringFromAny(any any) string {
 	return fmt.Sprintf("%v", any)
 }
 
@@ -53,7 +53,8 @@ func TemplateFactory(name string, format string) *template.Template {
 	return t
 }
 
-func mustPrepTemplate(name string, formatString string, data interface{}) []byte {
+func mustPrepTemplate(name string, formatString string,
+	data any) []byte {
 	var wr bytes.Buffer
 	err := TemplateFactory(name, formatString).Execute(&wr, data)
 	if err != nil {

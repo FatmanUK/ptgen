@@ -238,7 +238,7 @@ func loadPattern(logs chan string, fileName string,
 		return pt.PatternFactory(), err
 	}
 	defer file.Close()
-	var p interface{}
+	var p any
 	p, err = readPattern(file, logs, isHexRows)
 	pattern = p.(pt.Pattern)
 	return pattern, err
@@ -305,15 +305,14 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	return err
 }
 
-func threadGenerate(logs chan string, metaFile interface{},
-	patternsPath interface{}) {
+func threadGenerate(logs chan string, metaFile any, patternPath any) {
 	defer close(logs)
 	var err error
 	proj := pt.ModProjectFactory()
-	pttns := stringFromInterface(patternsPath)
+	pttns := stringFromAny(patternPath)
 	err = populatePatterns(&proj, logs, pttns)
 	panicIfNotNil(err)
-	meta := stringFromInterface(metaFile)
+	meta := stringFromAny(metaFile)
 	err = populateMetadata(&proj, logs, meta)
 	panicIfNotNil(err)
 	err = outputEverything(&proj, logs)

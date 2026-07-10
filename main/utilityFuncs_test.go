@@ -61,5 +61,5 @@ func TestTemplateFactory(t *testing.T) {
 }
 
 func TestMustPrepTemplate(t *testing.T) {
-	// func mustPrepTemplate(name string, formatString string, data interface{}) []byte
+	// func mustPrepTemplate(name string, formatString string, data any) []byte
 }
