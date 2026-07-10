@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	pt "ptgen/internal/protracker"
 )
 
 func TestReadPattern(t *testing.T) {
@@ -13,7 +14,15 @@ func TestReadMetadata(t *testing.T) {
 }
 
 func TestDefaultOrderlist(t *testing.T) {
-	// func defaultOrderlist(proj *pt.ModProject) []uint8
+	proj := pt.ModProjectFactory()
+	pttn := pt.PatternFactory()
+	proj.Patterns = []pt.Pattern{ pttn, pttn, pttn, pttn, pttn }
+	proj.OrderList = defaultOrderlist(&proj)
+	if proj.IsOrderListValid() {
+		t.Logf("Order list is ok,")
+	} else {
+		t.Errorf("Order list is wrong,")
+	}
 }
 
 func TestCountPatterns(t *testing.T) {
