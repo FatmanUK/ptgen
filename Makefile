@@ -4,7 +4,7 @@ PODMAN = podman
 APP_BINARY = ptgen
 IMAGE_REPO = ghcr.io/fatmanuk
 IMAGE_NAME = $(IMAGE_REPO)/ptgen
-V_TAG = $(shell git tag --list 'v*' | head -n1)
+V_TAG = $(shell git tag --list 'v*' | tail -n1)
 VERSION = $(if $(V_TAG),$(V_TAG),v0.0.0)
 
 BUILD_DATE = $(shell date +%Y%m%d)
