@@ -4,16 +4,14 @@ import (
 	"testing"
 )
 
-func compareSlices(a []string, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
+type NumTests struct {
+	number string
+	isHex bool
+	expected uint16
+}
+
+func TestCompareSlices(t *testing.T) {
+	//func compareSlices(a []string, b []string) bool
 }
 
 func TestRemoveEmptyStrings(t *testing.T) {
@@ -43,12 +41,6 @@ func TestRemoveEmptyStrings(t *testing.T) {
 	}
 }
 
-type NumTests struct {
-	number string
-	isHex bool
-	expected uint16
-}
-
 func TestRowNumFromRowStr(t *testing.T) {
 	tests := []NumTests{
 		{ "1e", true, 30 },
@@ -61,4 +53,13 @@ func TestRowNumFromRowStr(t *testing.T) {
 			t.Errorf("Output doesn't match expected solution. %d != %d", out, test.expected)
 		}
 	}
+}
+
+// Need to think about this some more.
+func TestTemplateFactory(t *testing.T) {
+	// func TemplateFactory(name string, format string) *template.Template
+}
+
+func TestMustPrepTemplate(t *testing.T) {
+	// func mustPrepTemplate(name string, formatString string, data interface{}) []byte
 }
