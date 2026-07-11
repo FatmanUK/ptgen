@@ -6,21 +6,21 @@ package protracker
 // Max file size = 65535*2 = 131070, needs a uint32 to store them.
 // Length = 0 for no loop.
 type Sample struct {
-	Id uint8
+	Id     uint8
 	Source string
-	Name string
-	Start uint32
-	End uint32
+	Name   string
+	Start  uint32
+	End    uint32
 	Length uint32
 }
 
 func SampleFactory() Sample {
 	return Sample{
-		Id: 0,
+		Id:     0,
 		Source: "",
-		Name: "",
-		Start: 0,
-		End: 0,
+		Name:   "",
+		Start:  0,
+		End:    0,
 		Length: 0,
 	}
 }

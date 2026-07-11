@@ -18,8 +18,8 @@ type ModInfo struct {
 // Up to 31 instruments
 type ModProject struct {
 	Title       string       `json:"title"`
-	Speed       uint8        `json:"speed"` 
-	BPM         uint8        `json:"bpm"`   
+	Speed       uint8        `json:"speed"`
+	BPM         uint8        `json:"bpm"`
 	OrderList   []uint8      `json:"orderList" yaml:"orderList"`
 	Patterns    []Pattern    `json:"patterns"`
 	Instruments []Instrument `json:"instruments"`

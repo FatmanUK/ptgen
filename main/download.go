@@ -1,19 +1,19 @@
 package main
 
 import (
-	"os"
-	"io"
-	"fmt"
-	"net/http"
-	"encoding/hex"
-	"path/filepath"
 	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type FileSource struct {
-	Ref string
-	URL string
+	Ref         string
+	URL         string
 	ExpectedSum SHA256Sum
 }
 
@@ -39,8 +39,8 @@ func (re *SHA256Sum) IsChecksumMatch(blob *[]byte) (bool, error) {
 }
 
 type Download struct {
-	Remote string
-	Local string
+	Remote      string
+	Local       string
 	ExpectedSum SHA256Sum
 }
 
@@ -48,8 +48,8 @@ func DownloadFactory(url string, e SHA256Sum, cache string) Download {
 	cache = filepath.Join(cache, "ptgen")
 	d := filepath.Join(cache, filepath.Base(url))
 	return Download{
-		Remote: url,
-		Local: d,
+		Remote:      url,
+		Local:       d,
 		ExpectedSum: e,
 	}
 }

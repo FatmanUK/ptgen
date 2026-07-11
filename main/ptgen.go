@@ -210,6 +210,7 @@ func isHexRowNotationDetected(path string) (bool, error) {
 	return false, nil
 }
 
+// TODO: row number '5x' or '6x' is an instant false.
 func checkFileForHexRow(filePath string, reRow *regexp.Regexp,
 	reHex *regexp.Regexp) (bool, error) {
 	file, err := os.Open(filePath)
@@ -292,8 +293,8 @@ func decideSources(samples []pt.Sample) (map[string]Download, error) {
 	st01 := []byte(SHA256_ST01)
 	st02 := []byte(SHA256_ST02)
 	sources := []FileSource{
-		{ "st01", URL_ST01, SHA256SumFactory(st01) },
-		{ "st02", URL_ST02, SHA256SumFactory(st02) },
+		{"st01", URL_ST01, SHA256SumFactory(st01)},
+		{"st02", URL_ST02, SHA256SumFactory(st02)},
 	}
 	downloads := map[string]Download{}
 	chosen := map[string]Download{}

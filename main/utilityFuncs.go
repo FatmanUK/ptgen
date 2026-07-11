@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"text/template"
-	"path/filepath"
 )
 
 func compareSlices[T comparable](a []T, b []T) bool {

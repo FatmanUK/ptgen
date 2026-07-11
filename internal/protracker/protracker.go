@@ -1,12 +1,12 @@
 package protracker
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
-	"encoding/binary"
 )
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
