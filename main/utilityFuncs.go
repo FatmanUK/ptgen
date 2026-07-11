@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"text/template"
+	"path/filepath"
 )
 
 func compareSlices[T comparable](a []T, b []T) bool {
@@ -61,4 +63,30 @@ func mustPrepTemplate(name string, formatString string,
 		panic(err)
 	}
 	return wr.Bytes()
+}
+
+func fileExists(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if err == nil {
+		return !info.IsDir(), nil
+	}
+	if os.IsNotExist(err) {
+		// doesn't exist
+		return false, nil
+	}
+	// permissions issue
+	return false, err
+}
+
+func checkFileExistsWithMkdir(path string) (bool, error) {
+	cacheDir := filepath.Dir(path)
+	err := os.MkdirAll(cacheDir, 0750)
+	if err != nil {
+		return false, err
+	}
+	exists, err := fileExists(path)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

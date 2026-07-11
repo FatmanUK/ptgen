@@ -78,6 +78,13 @@ const ERR_MOD_SIZE = `Binary payload footprint mismatch. Expected %d bytes, got 
 const ERR_MOD_TITLE_PAD = `Title field error. Expected custom byte-padding format layout.`
 const ERR_MOD_MAGIC = `Magic bytes missing from target offset 1080 (got %q).`
 const ERR_MOD_INSTR = `Instrument sample slot header #%d failed constraints.`
+const ERR_SAMPLE_TOO_LONG = `sample '%s' exceeds max length of 131070 bytes`
+const ERR_SAMPLE_LENGTH_ODD = `sample '%s' must have an even byte length (got %d)`
+const ERR_SAMPLE_LOOP_INVALID = `sample '%s' loop points exceed total sample length`
+const ERR_INSTRUMENT_TOO_MANY = `a maximum of 31 instruments are supported`
+const ERR_INSTRUMENT_INVALID_ID = `instrument '%s' has invalid ID %d (must be 1-31)`
+const ERR_INSTRUMENT_DUPLICATE = `duplicate instrument ID %d detected`
+const ERR_INSTRUMENT_SLOT = `instrument slot %d error: %w`
 
 // Test ok strings
 const MSG_CELL_NOTE_OK = `Note is ok.`

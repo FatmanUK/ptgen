@@ -6,6 +6,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"encoding/binary"
 )
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
@@ -176,7 +177,6 @@ func injectInitialTempo(proj *ModProject) error {
 		return err
 	}
 	cmdIdx := injectCommands(proj, fstPttnIdx, commands)
-
 	// If we still have commands left over, row 0 was
 	// too saturated with user effects
 	if cmdIdx < uint8(len(commands)) {
@@ -185,43 +185,153 @@ func injectInitialTempo(proj *ModProject) error {
 	return nil
 }
 
-func writeCell(w io.Writer, row Row, p int, r int) error {
-	for cIdx, cell := range row {
-		encodedBytes, err := encodeCell(cell)
-		msgErr := fmt.Errorf(ERR_LOCATION, p, r, cIdx, err)
-		if err != nil {
-			return msgErr
+// Validates and packs a 30-byte ProTracker sample header.
+func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
+	var out [30]byte
+	// 1. Name (Padded/truncated to exactly 22 bytes)
+	copy(out[0:22], inst.Name)
+	dataLen := len(inst.Data)
+	if dataLen > 131070 {
+		return out, fmt.Errorf(ERR_SAMPLE_TOO_LONG, inst.Name)
+	}
+	if dataLen%2 != 0 {
+		return out, fmt.Errorf(ERR_SAMPLE_LENGTH_ODD, inst.Name, dataLen)
+	}
+	// 2. Length (Stored in words)
+	binary.BigEndian.PutUint16(out[22:24], uint16(dataLen/2))
+	// 3. Finetune & Volume
+	out[24] = inst.Finetune & 0x0F
+	vol := inst.Volume
+	if vol > 64 {
+		vol = 64
+	}
+	out[25] = vol
+	// 4. Loop Points (Stored in words)
+	// If the loop length is 2 bytes or less, we treat it as an unlooped sample
+	if inst.RepeatLen <= 2 {
+		binary.BigEndian.PutUint16(out[26:28], 0) // Repeat Start = 0
+		binary.BigEndian.PutUint16(out[28:30], 1) // Repeat Length = 1 word (Amiga standard for no loop)
+	} else {
+		if inst.RepeatStart+inst.RepeatLen > uint32(dataLen) {
+			return out, fmt.Errorf(ERR_SAMPLE_LOOP_INVALID, inst.Name)
 		}
-		w.Write(encodedBytes[:])
+		binary.BigEndian.PutUint16(out[26:28], uint16(inst.RepeatStart/2))
+		binary.BigEndian.PutUint16(out[28:30], uint16(inst.RepeatLen/2))
+	}
+	return out, nil
+}
+
+func writeCell(w io.Writer, row Row, p int, r int) error {
+	for c, cell := range row {
+		encodedBytes, err := encodeCell(cell)
+		if err != nil {
+			return fmt.Errorf(ERR_LOCATION, p, r, c, err)
+		}
+		_, err = w.Write(encodedBytes[:])
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func writeHeader(w io.Writer, proj *ModProject) {
-	// 1. Write song title
-	titleBytes := make([]byte, 20)
-	copy(titleBytes, proj.Title)
-	w.Write(titleBytes)
-	// 2. Write 31 Empty Sample Headers (30 bytes each)
-	emptySample := make([]byte, 30)
-	// 3. Repeat Length must be 1 word for empty samples
-	emptySample[29] = 0x01
-	for i := 0; i < 31; i++ {
-		w.Write(emptySample)
+func injectAndCheck(proj *ModProject) error {
+	err := injectInitialTempo(proj)
+	if err != nil {
+		return fmt.Errorf(ERR_INJECT, err)
 	}
-	songLength := uint8(len(proj.OrderList))
-	w.Write([]byte{songLength, 0x7F}) // Song length, Restart byte
-	sequenceTable := make([]byte, 128)
-	copy(sequenceTable, proj.OrderList)
-	w.Write(sequenceTable)
-	// 4. Write Magic String
-	w.Write([]byte(MAGIC_BYTES))
+	if !proj.IsOrderListValid() {
+		return fmt.Errorf(ERR_MOD_LIST)
+	}
+	if len(proj.Instruments) > 31 {
+		return fmt.Errorf(ERR_INSTRUMENT_TOO_MANY)
+	}
+	return err
 }
 
-func writePatterns(w io.Writer, proj *ModProject) error {
-	// 5. Write Patterns
-	//var err error
-	for pIdx, pattern := range proj.Patterns {
+// 0. Pre-process sparse instruments into a rigid 31-slot lookup map
+func preProcessInstruments(slots *[31]*Instrument, proj *ModProject) error {
+	for i := range proj.Instruments {
+		inst := &proj.Instruments[i]
+		if inst.ID < 1 || inst.ID > 31 {
+			return fmt.Errorf(ERR_INSTRUMENT_INVALID_ID, inst.Name, inst.ID)
+		}
+		if slots[inst.ID-1] != nil {
+			return fmt.Errorf(ERR_INSTRUMENT_DUPLICATE, inst.ID)
+		}
+		slots[inst.ID-1] = inst
+	}
+	return nil
+}
+
+// 1. Write song title
+func writeTitle(w io.Writer, title string) error {
+	titleBytes := make([]byte, 20)
+	copy(titleBytes, title)
+	_, err := w.Write(titleBytes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// "If any of those raw files happen to have an odd byte length (which
+// occasionally happened with manual rips of those old Amiga disks),
+// you can simply append a single 0x00 byte to bassData before
+// assigning it to the struct to satisfy the strict word-length
+// constraint we built into encodeInstrumentHeader."
+// 2. Write 31 Sample Headers (30 bytes each)
+func writeSampleHeaders(w io.Writer, slots *[31]*Instrument) error {
+	for i := 0; i < 31; i++ {
+		if slots[i] != nil { // Slot is populated
+			headerBytes, err := encodeInstrumentHeader(*slots[i])
+			if err != nil {
+				return fmt.Errorf(ERR_INSTRUMENT_SLOT, i+1, err)
+			}
+			_, err = w.Write(headerBytes[:])
+			if err != nil {
+				return err
+			}
+		} else { // Slot is empty
+			emptySample := make([]byte, 30)
+			emptySample[29] = 0x01 // Repeat length = 1 word
+			_, err := w.Write(emptySample)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// 3. Write Sequence Data
+func writeOrderList(w io.Writer, orderList []uint8) error {
+	songLength := uint8(len(orderList))
+	_, err := w.Write([]byte{songLength, 0x7F})
+	if err != nil {
+		return err
+	}
+	orderTable := make([]byte, 128)
+	copy(orderTable, orderList)
+	_, err = w.Write(orderTable)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 4. Write Magic String
+func writeMagic(w io.Writer) error {
+	_, err := w.Write([]byte(MAGIC_BYTES))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 5. Write Patterns
+func writePatterns(w io.Writer, pttns []Pattern) error {
+	for pIdx, pattern := range pttns {
 		for rIdx, row := range pattern {
 			err := writeCell(w, row, pIdx, rIdx)
 			if err != nil {
@@ -232,16 +342,49 @@ func writePatterns(w io.Writer, proj *ModProject) error {
 	return nil
 }
 
+// 6. Write Raw PCM Sample Data block
+func writeSamples(w io.Writer, slots *[31]*Instrument) error {
+	for i := 0; i < 31; i++ {
+		d := slots[i].Data
+		if slots[i] != nil && len(d) > 0 {
+			if _, err := w.Write(d); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // WriteMod compiles proj into a binary ProTracker file stream.
 func WriteMod(w io.Writer, proj *ModProject) error {
-	err := injectInitialTempo(proj)
+	var slots [31]*Instrument
+	err := injectAndCheck(proj)
 	if err != nil {
-		return fmt.Errorf(ERR_INJECT, err)
+		return err
 	}
-	if !proj.IsOrderListValid() {
-		return errors.New(ERR_MOD_LIST)
+	err = preProcessInstruments(&slots, proj)
+	if err != nil {
+		return err
 	}
-	writeHeader(w, proj)
-	err = writePatterns(w, proj)
-	return err
+	err = writeTitle(w, proj.Title)
+	if err != nil {
+		return err
+	}
+	err = writeSampleHeaders(w, &slots)
+	if err != nil {
+		return err
+	}
+	err = writeOrderList(w, proj.OrderList)
+	if err != nil {
+		return err
+	}
+	err = writeMagic(w)
+	if err != nil {
+		return err
+	}
+	err = writePatterns(w, proj.Patterns)
+	if err != nil {
+		return err
+	}
+	return writeSamples(w, &slots)
 }

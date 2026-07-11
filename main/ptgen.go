@@ -16,6 +16,7 @@ import (
 	pt "ptgen/internal/protracker"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type ScanData struct {
@@ -284,6 +285,53 @@ func populatePatterns(proj *pt.ModProject, logs chan string,
 	return err
 }
 
+// Find the user cache dir. Create source mappings
+// ("ref"=>("https://url","local/file")). Decide on mappings depending
+// which sample refs are selected.
+func decideSources(samples []pt.Sample) (map[string]Download, error) {
+	st01 := []byte(SHA256_ST01)
+	st02 := []byte(SHA256_ST02)
+	sources := []FileSource{
+		{ "st01", URL_ST01, SHA256SumFactory(st01) },
+		{ "st02", URL_ST02, SHA256SumFactory(st02) },
+	}
+	downloads := map[string]Download{}
+	chosen := map[string]Download{}
+	cache, err := os.UserCacheDir()
+	if err != nil {
+		return chosen, err
+	}
+	for _, m := range sources {
+		downloads[m.Ref] = DownloadFactory(m.URL,
+			m.ExpectedSum, cache)
+	}
+	for _, s := range samples {
+		chosen[s.Source] = downloads[s.Source]
+	}
+	return chosen, nil
+}
+
+// Has delay to prevent abuse/damage to Aminet. Also checks checksums.
+func download(downloads map[string]Download, logs chan string) error {
+	for _, v := range downloads {
+		exists, err := checkFileExistsWithMkdir(v.Local)
+		if err != nil {
+			return err
+		}
+		if exists {
+			continue
+		}
+		logs <- fmt.Sprintf(MSG_DOWNLOAD, v.Remote, v.Local)
+		err = v.BlobFromURI(logs)
+		if err != nil {
+			return err
+		}
+		logs <- fmt.Sprintf(MSG_SAFETY_PAUSE, SAFETY_PAUSE_S)
+		time.Sleep(SAFETY_PAUSE_S * time.Second)
+	}
+	return nil
+}
+
 func outputEverything(proj *pt.ModProject, logs chan string) error {
 	var buf bytes.Buffer
 	var err error
@@ -292,6 +340,14 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	logs <- string(output)
 	if len(proj.Title) > 20 { // title less than 21 bytes
 		return errors.New(ERR_MOD_TITLE_LONG)
+	}
+	downloads, err := decideSources(proj.Samples)
+	if err != nil {
+		return err
+	}
+	err = download(downloads, logs)
+	if err != nil {
+		return err
 	}
 	err = pt.WriteMod(&buf, proj)
 	if err != nil {

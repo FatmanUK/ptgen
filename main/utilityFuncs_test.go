@@ -103,3 +103,8 @@ func TestCompareSlices(t *testing.T) {
 		}
 	}
 }
+
+/*
+func fileExists(path string) (bool, error) {
+func checkFileExistsWithMkdir(path string) (bool, error) {
+*/
