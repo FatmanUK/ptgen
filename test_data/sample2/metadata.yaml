@@ -9,3 +9,22 @@ orderList:
   - 3
 speed: 8
 bpm: 145
+samples:
+  - id: 1
+    source: st01
+    name: ST-01/CloseHiHat
+  - id: 3
+    source: st01
+    name: ST-01/Leader
+    start: 0x837  # or 0xab9
+    length: 0x41  # or 0x042
+  - id: 4
+    source: st01
+    name: ST-01/DigDug
+    start: 0x96d   # or 0x9a8
+    length: 0x281  # or 0x200
+  - id: 5
+    source: st01
+    name: ST-01/Heaven
+    start: 0x1770
+    length: 0x60

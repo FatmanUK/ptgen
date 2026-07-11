@@ -1,7 +1,5 @@
 {
   "title": "Sample Song",
-  "speed": 8,
-  "bpm": 145,
   "orderList": [
     0,
     1,
@@ -9,5 +7,35 @@
     1,
     2,
     3
+  ],
+  "speed": 8,
+  "bpm": 145,
+  "samples": [
+    {
+      "id": 1,
+      "source": "st01",
+      "name": "ST-01/CloseHiHat"
+    },
+    {
+      "id": 3,
+      "source": "st01",
+      "name": "ST-01/Leader",
+      "start": 2103,
+      "length": 65
+    },
+    {
+      "id": 4,
+      "source": "st01",
+      "name": "ST-01/DigDug",
+      "start": 2413,
+      "length": 641
+    },
+    {
+      "id": 5,
+      "source": "st01",
+      "name": "ST-01/Heaven",
+      "start": 6000,
+      "length": 96
+    }
   ]
 }
