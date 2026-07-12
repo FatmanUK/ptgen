@@ -1,3 +1,5 @@
 ptgen
 *.mod
 !go.mod
+samples/
+notes.txt

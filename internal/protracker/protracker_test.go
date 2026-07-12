@@ -383,3 +383,7 @@ func TestWriteSamples(t *testing.T) {
 func TestWriteHeaders(t *testing.T) {
 	//func writeHeaders(w io.Writer,
 }
+
+func TestExtractAndInjectSamples(t *testing.T) {
+	//func extractAndInjectSamples(proj *ModProject) ([]byte, error) {
+}
