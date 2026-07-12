@@ -10,16 +10,16 @@ import (
 // Instrument: 1-31 (0 means no instrument)
 // Effect: e.g., "C40", "047", "F03", or ""
 type Cell struct {
-	Note       string `json:"note"`
-	Instrument uint8  `json:"instrument"`
-	Effect     string `json:"effect"`
+	Note   string `json:"note"`
+	Instr  uint8  `json:"instr"`
+	Effect string `json:"effect"`
 }
 
 func CellFactory() Cell {
 	return Cell{
-		Note:       "---",
-		Instrument: 0,
-		Effect:     "---",
+		Note:   "---",
+		Instr:  0,
+		Effect: "---",
 	}
 }
 
@@ -45,7 +45,7 @@ func (c *Cell) Load(s string) error {
 			if err != nil {
 				return err
 			}
-			c.Instrument = uint8(u)
+			c.Instr = uint8(u)
 		}
 	}
 	if l >= 10 {
@@ -56,7 +56,7 @@ func (c *Cell) Load(s string) error {
 
 // Save: serialise struct to a string
 func (c *Cell) Save() string {
-	i := fmt.Sprintf("%02x", c.Instrument)
+	i := fmt.Sprintf("%02x", c.Instr)
 	if i == "00" {
 		i = "--"
 	}

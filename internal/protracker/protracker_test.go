@@ -31,16 +31,16 @@ type ModProjectTestError struct {
 func TestEncodeCell_Valid(t *testing.T) {
 	t.Parallel()
 	var tests []CellTestData
-	cellBlank := Cell{Note: "", Instrument: 0, Effect: ""}
-	cellEmpty := Cell{Note: "---", Instrument: 0, Effect: "---"}
-	cellLowBound := Cell{Note: "C-3", Instrument: 0, Effect: ""}
-	cellMidNote := Cell{Note: "C-4", Instrument: 0, Effect: ""}
-	cellHighNote := Cell{Note: "B-5", Instrument: 0, Effect: ""}
-	cellCase := Cell{Note: "g#4", Instrument: 0, Effect: ""}
-	cellEffectOnly := Cell{Note: "", Instrument: 0, Effect: "C40"}
-	cellEffectCase := Cell{Note: "", Instrument: 0, Effect: "f03"}
-	cellInstrBound := Cell{Note: "", Instrument: 31, Effect: ""}
-	cellPacked := Cell{Note: "C-4", Instrument: 17, Effect: "C40"}
+	cellBlank := Cell{Note: "", Instr: 0, Effect: ""}
+	cellEmpty := Cell{Note: "---", Instr: 0, Effect: "---"}
+	cellLowBound := Cell{Note: "C-3", Instr: 0, Effect: ""}
+	cellMidNote := Cell{Note: "C-4", Instr: 0, Effect: ""}
+	cellHighNote := Cell{Note: "B-5", Instr: 0, Effect: ""}
+	cellCase := Cell{Note: "g#4", Instr: 0, Effect: ""}
+	cellEffectOnly := Cell{Note: "", Instr: 0, Effect: "C40"}
+	cellEffectCase := Cell{Note: "", Instr: 0, Effect: "f03"}
+	cellInstrBound := Cell{Note: "", Instr: 31, Effect: ""}
+	cellPacked := Cell{Note: "C-4", Instr: 17, Effect: "C40"}
 	tests = append(tests, CellTestData{
 		name:     "Completely blank cell",
 		input:    cellBlank,
@@ -122,7 +122,7 @@ func TestEncodeCell_Errors(t *testing.T) {
 	cellTooLow := Cell{Note: "B-2"}
 	cellTooHigh := Cell{Note: "C-6"}
 	cellRedDwarfError := Cell{Note: "H-4"}
-	cellInstrTooHigh := Cell{Instrument: 32}
+	cellInstrTooHigh := Cell{Instr: 32}
 	cellEffectTooShort := Cell{Effect: "C4"}
 	cellEffectTooLong := Cell{Effect: "C400"}
 	cellEffectWtf := Cell{Effect: "G00"}
@@ -191,7 +191,7 @@ func TestEncodeCell_Errors(t *testing.T) {
 func TestWriteMod_Integration(t *testing.T) {
 	// Generate pattern mock payload (64 rows, 4 channels)
 	mockPattern := Pattern{}
-	cellMock := Cell{Note: "C-4", Instrument: 1, Effect: "000"}
+	cellMock := Cell{Note: "C-4", Instr: 1, Effect: "000"}
 	for i := 0; i < 64; i++ {
 		mockPattern[i] = Row{
 			cellMock, Cell{}, Cell{}, Cell{},
@@ -282,4 +282,104 @@ func TestWriteMod_Integration(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPackBytes(t *testing.T) {
+	// in:  b0101 0101 bXXXX 0001  0101 0101 bXXXX 0101 b01010101
+	//    0hi^^^^ ^^^^2hi 0lo^^^^  ^^^^ ^^^^1   2lo^^^^ 3^^^^^^^^
+	// out: b0101 0001 b0101 0101 b0101 0101 b0101 0101
+	//expectedBytes := []byte{81, 85, 85, 85}
+	expectedBytes := []byte{0x51, 0x55, 0x55, 0x55}
+	//output := packBytes(85, 341, 5, 85)
+	output := packBytes(0x55, 0x155, 0x5, 0x55)
+	if compareSlices(output[:], expectedBytes) {
+		t.Logf(`Packing is ok.`)
+	} else {
+		t.Errorf(`Failed. Expected %v, got %v.`,
+			expectedBytes, output)
+	}
+}
+
+func TestWriteMagic(t *testing.T) {
+	expectedBytes := []byte{'M', '.', 'K', '.'}
+	buf := bytes.Buffer{}
+	err := writeMagic(&buf)
+	if err != nil {
+		t.Errorf(`Failed. %v`, err)
+	}
+	b := buf.Bytes()
+	if compareSlices(b, expectedBytes) {
+		t.Logf(`Magic is ok.`)
+	} else {
+		t.Errorf(`Failed. Expected %v, got %v.`,
+			expectedBytes, b)
+	}
+}
+
+func TestParseNote(t *testing.T) {
+	//func parseNote(n string) (uint16, bool) {
+}
+
+func TestParseEffect(t *testing.T) {
+	//func parseEffect(e string) (uint8, uint8, error) {
+}
+
+func TestPrepareCommands(t *testing.T) {
+	//func prepareCommands(s uint8, b uint8) ([]string, error) {
+}
+
+func TestInjectCommands(t *testing.T) {
+	//func injectCommands(p *ModProject, i uint8, commands []string) uint8 {
+}
+
+func TestInjectInitialTempo(t *testing.T) {
+	//func injectInitialTempo(proj *ModProject) error {
+}
+
+func TestEncodeInstrumentHeader(t *testing.T) {
+	//func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
+}
+
+func TestWriteCell(t *testing.T) {
+	//func writeCell(w io.Writer, row Row, p int, r int) error {
+}
+
+func TestInjectAndCheck(t *testing.T) {
+	//func injectAndCheck(proj *ModProject) error {
+}
+
+func TestIsSlotPopulated(t *testing.T) {
+	//func isSlotPopulated(slot *Instrument) bool {
+}
+
+func TestPreProcessInstruments(t *testing.T) {
+	//func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
+}
+
+func TestWriteTitle(t *testing.T) {
+	//func writeTitle(w io.Writer, title string) error {
+}
+
+func TestWriteSampleHeader(t *testing.T) {
+	//func writeSampleHeader(w io.Writer, instr *Instrument) error {
+}
+
+func TestWriteSampleHeaders(t *testing.T) {
+	//func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
+}
+
+func TestWriteOrderList(t *testing.T) {
+	//func writeOrderList(w io.Writer, orderList []uint8) error {
+}
+
+func TestWritePatterns(t *testing.T) {
+	//func writePatterns(w io.Writer, pttns []Pattern) error {
+}
+
+func TestWriteSamples(t *testing.T) {
+	//func writeSamples(w io.Writer, slots [31]Instrument) error {
+}
+
+func TestWriteHeaders(t *testing.T) {
+	//func writeHeaders(w io.Writer,
 }

@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-/*
 func TestReadPattern(t *testing.T) {
 	// func readPattern(file io.Reader, logs chan string, isHexRows bool) (pt.Pattern, error)
 }
@@ -15,7 +14,6 @@ func TestReadPattern(t *testing.T) {
 func TestReadMetadata(t *testing.T) {
 	// func readMetadata(proj *pt.ModProject, logs chan string, file *os.File) (*pt.ModProject, error)
 }
-*/
 
 func TestDefaultOrderlist(t *testing.T) {
 	proj := pt.ModProjectFactory()
@@ -80,3 +78,16 @@ func TestValidatePatterns(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+func scanLoop(logs chan string, d *ScanData) (pt.Pattern, error) {
+func populateMetadata(proj *pt.ModProject, logs chan string,
+func locateFile(expected string, entries []os.DirEntry) bool {
+func prepareRegexes() (*regexp.Regexp, *regexp.Regexp,
+func checkFileForHexRow(filePath string, reRow *regexp.Regexp,
+func loadPattern(logs chan string, fileName string,
+func populatePatterns(proj *pt.ModProject, logs chan string,
+func decideSources(samples []pt.Instrument) (map[string]Download, error) {
+func download(downloads map[string]Download, logs chan string) error {
+func outputEverything(proj *pt.ModProject, logs chan string) error {
+*/

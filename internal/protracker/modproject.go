@@ -1,5 +1,9 @@
 package protracker
 
+import (
+	"fmt"
+)
+
 type ModInfo struct {
 	Title       string
 	Speed       uint8
@@ -7,7 +11,6 @@ type ModInfo struct {
 	OrderLen    uint8
 	Patterns    uint8
 	Instruments uint8
-	Samples     uint8
 }
 
 // TODO: enforce these limits.
@@ -23,7 +26,6 @@ type ModProject struct {
 	OrderList   []uint8      `json:"orderList" yaml:"orderList"`
 	Patterns    []Pattern    `json:"patterns"`
 	Instruments []Instrument `json:"instruments"`
-	Samples     []Sample     `json:"samples"`
 }
 
 func ModProjectFactory() ModProject {
@@ -34,7 +36,6 @@ func ModProjectFactory() ModProject {
 		OrderList:   []uint8{0},
 		Patterns:    []Pattern{PatternFactory()},
 		Instruments: []Instrument{},
-		Samples:     []Sample{},
 	}
 }
 
@@ -46,7 +47,6 @@ func (re *ModProject) ModInfoFactory() ModInfo {
 		OrderLen:    uint8(len(re.OrderList)),
 		Patterns:    uint8(len(re.Patterns)),
 		Instruments: uint8(len(re.Instruments)),
-		Samples:     uint8(len(re.Samples)),
 	}
 }
 
@@ -61,4 +61,16 @@ func (re *ModProject) IsOrderListValid() bool {
 		}
 	}
 	return true
+}
+
+func (re *ModProject) IsFirstPatternValid() (uint8, error) {
+	var err error
+	if len(re.OrderList) == 0 {
+		return 0, fmt.Errorf(ERR_MOD_LIST_EMPTY)
+	}
+	i := re.OrderList[0]
+	if int(i) >= len(re.Patterns) {
+		err = fmt.Errorf(ERR_MOD_LIST_OOB, i)
+	}
+	return i, err
 }

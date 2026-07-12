@@ -109,6 +109,13 @@ func defaultOrderlist(proj *pt.ModProject) []uint8 {
 	return orderList
 }
 
+func calculateLength(proj *pt.ModProject, logs chan string) {
+	for k := range proj.Instruments {
+		(&proj.Instruments[k]).CalculateLength()
+		//logs <- proj.Instruments[k].Save()
+	}
+}
+
 // The song metadata in JSON or YAML format, including order list.
 func populateMetadata(proj *pt.ModProject, logs chan string,
 	fileName string) error {
@@ -125,6 +132,7 @@ func populateMetadata(proj *pt.ModProject, logs chan string,
 		if err != nil {
 			return err
 		}
+		calculateLength(proj, logs)
 	}
 	if !proj.IsOrderListValid() {
 		err = errors.New(ERR_MOD_OLST)
@@ -289,7 +297,7 @@ func populatePatterns(proj *pt.ModProject, logs chan string,
 // Find the user cache dir. Create source mappings
 // ("ref"=>("https://url","local/file")). Decide on mappings depending
 // which sample refs are selected.
-func decideSources(samples []pt.Sample) (map[string]Download, error) {
+func decideSources(samples []pt.Instrument) (map[string]Download, error) {
 	st01 := []byte(SHA256_ST01)
 	st02 := []byte(SHA256_ST02)
 	sources := []FileSource{
@@ -342,7 +350,7 @@ func outputEverything(proj *pt.ModProject, logs chan string) error {
 	if len(proj.Title) > 20 { // title less than 21 bytes
 		return errors.New(ERR_MOD_TITLE_LONG)
 	}
-	downloads, err := decideSources(proj.Samples)
+	downloads, err := decideSources(proj.Instruments)
 	if err != nil {
 		return err
 	}

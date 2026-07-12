@@ -26,12 +26,12 @@ func TestCellFactory(t *testing.T) {
 			FMT_TST_STRING)
 		t.Errorf(m, "---", c.Note)
 	}
-	if c.Instrument == 0 {
+	if c.Instr == 0 {
 		t.Logf(MSG_CELL_INST_OK)
 	} else {
 		m := fmt.Sprintf("%s %s", ERR_CELL_INST,
 			FMT_TST_NUMBER)
-		t.Errorf(m, 0, c.Instrument)
+		t.Errorf(m, 0, c.Instr)
 	}
 	if c.Effect == "---" {
 		t.Logf(MSG_CELL_EFFT_OK)
@@ -74,12 +74,12 @@ func TestCellLoad(t *testing.T) {
 			FMT_TST_STRING)
 		t.Errorf(m, note, c.Note)
 	}
-	if c.Instrument == inst {
+	if c.Instr == inst {
 		t.Logf(MSG_CELL_INST_OK)
 	} else {
 		m := fmt.Sprintf("%s %s", ERR_CELL_INST,
 			FMT_TST_NUMBER)
-		t.Errorf(m, inst, c.Instrument)
+		t.Errorf(m, inst, c.Instr)
 	}
 	if c.Effect == effect {
 		t.Logf(MSG_CELL_EFFT_OK)
@@ -93,7 +93,7 @@ func TestCellLoad(t *testing.T) {
 func TestCellSave(t *testing.T) {
 	var err error
 	c := CellFactory()
-	c.Note, c.Instrument, c.Effect, err = makeVars()
+	c.Note, c.Instr, c.Effect, err = makeVars()
 	if err != nil {
 		t.Errorf("%v", err)
 	}

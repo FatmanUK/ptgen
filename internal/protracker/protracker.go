@@ -2,10 +2,8 @@ package protracker
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 )
 
@@ -39,31 +37,22 @@ func parseNote(n string) (uint16, bool) {
 }
 
 // Parse Hex Effect String
-// Return: cmd, param, isValid, error
-func parseEffect(e string) (uint8, uint8, bool, error) {
-	var cmd uint8 = 0
-	var param uint8 = 0
-	var errEffect error
-	// Ignore empty strings or std empty tracker representations
-	if e != "" && e != "000" && e != "---" {
-		if len(e) != 3 {
-			errEffect = fmt.Errorf(ERR_CELL_EFFT, e)
-			return 0, 0, false, errEffect
-		}
-		cmdVal, err := strconv.ParseUint(e[0:1], 16, 8)
-		if err != nil {
-			errEffect = fmt.Errorf(ERR_CELL_EFFT_CMMD, e)
-			return 0, 0, false, errEffect
-		}
-		cmd = uint8(cmdVal)
-		paramVal, err := strconv.ParseUint(e[1:3], 16, 8)
-		if err != nil {
-			errEffect = fmt.Errorf(ERR_CELL_EFFT_PARM, e)
-			return 0, 0, false, errEffect
-		}
-		param = uint8(paramVal)
+// Return: cmd, param, error
+func parseEffect(e string) (uint8, uint8, error) {
+	if len(e) != 3 {
+		return 0, 0, fmt.Errorf(ERR_CELL_EFFT, e)
 	}
-	return cmd, param, true, errEffect
+	cmdVal, err := uint8FromHexString(e[0:1])
+	if err != nil {
+		err2 := fmt.Errorf(ERR_CELL_EFFT_CMMD, e[0:1], err)
+		return 0, 0, err2
+	}
+	paramVal, err := uint8FromHexString(e[1:3])
+	if err != nil {
+		err2 := fmt.Errorf(ERR_CELL_EFFT_PARM, e[1:3], err)
+		return 0, 0, err2
+	}
+	return uint8(cmdVal), uint8(paramVal), nil
 }
 
 // Pack cell data into exactly 4 bytes.
@@ -71,55 +60,43 @@ func parseEffect(e string) (uint8, uint8, bool, error) {
 // 4 bytes is 32 bits. We have to throw away 8 bits somewhere.
 // We're only using 12 bits of period. And we only need the lower
 // 4 bits of cmd. Can lose the 4 MSB on both. Packing achieved.
+// Byte 0: Instrument (upper 4 bits) | Period (upper 4 bits)
+// Byte 1: Period (lower 8 bits)
+// Byte 2: Instrument (lower 4 bits) | Effect Command (4 bits)
+// Byte 3: Effect Parameter
 func packBytes(i uint8, p uint16, ec uint8, ep uint8) [4]byte {
 	var out [4]byte
-	// Byte 0: Instrument (upper 4 bits) | Period (upper 4 bits)
 	out[0] = (i & 0xF0) | uint8((p&0x0F00)>>8)
-	// Byte 1: Period (lower 8 bits)
 	out[1] = uint8(p & 0x00FF)
-	// Byte 2: Instrument (lower 4 bits) | Effect Command (4 bits)
 	out[2] = ((i & 0x0F) << 4) | (ec & 0x0F)
-	// Byte 3: Effect Parameter
 	out[3] = ep
 	return out
 }
 
 // encodeCell packs a JSON cell into the 4-byte ProTracker format,
 // parsing MilkyTracker-style hex effect strings.
+// Instrument must be at least 1. 0 is reserved internally,
+// but can be selected. (It just can't be set.)
 func encodeCell(c Cell) ([4]byte, error) {
 	var out [4]byte
-	var period uint16
 	var cmd uint8
 	var param uint8
-	var isValid bool
-	period, isValid = parseNote(c.Note)
-	if !isValid {
+	var err error
+	period, isNoteValid := parseNote(c.Note)
+	if !isNoteValid {
 		return out, fmt.Errorf(ERR_CELL_NOTE, c.Note)
 	}
-	// Instrument must be at least 1. 0 is reserved internally,
-	// but can be selected. (It just can't be set.)
-	if c.Instrument > 31 {
-		return out, fmt.Errorf(ERR_CELL_INST, c.Instrument)
+	if c.Instr > 31 {
+		return out, fmt.Errorf(ERR_CELL_INST, c.Instr)
 	}
-	cmd, param, isValid, err := parseEffect(c.Effect)
-	if !isValid {
+	if c.Effect != "" && c.Effect != "000" && c.Effect != "---" {
+		cmd, param, err = parseEffect(c.Effect)
+	}
+	if err != nil {
 		return out, err
 	}
-	out = packBytes(c.Instrument, period, cmd, param)
+	out = packBytes(c.Instr, period, cmd, param)
 	return out, nil
-}
-
-func fstPttnValid(o []uint8, p []Pattern) (uint8, error) {
-	if len(o) == 0 {
-		return 0, errors.New(ERR_MOD_LIST_EMPTY)
-	}
-	// Identify the pattern that will play first in the order list
-	firstPatternIdx := o[0]
-	if int(firstPatternIdx) >= len(p) {
-		err := fmt.Errorf(ERR_MOD_LIST_OOB, firstPatternIdx)
-		return firstPatternIdx, err
-	}
-	return firstPatternIdx, nil
 }
 
 func prepareCommands(s uint8, b uint8) ([]string, error) {
@@ -163,24 +140,20 @@ func injectCommands(p *ModProject, i uint8, commands []string) uint8 {
 // injectInitialTempo scans the first row of the starting pattern and
 // attempts to inject Fxx speed/BPM commands into empty effect slots.
 func injectInitialTempo(proj *ModProject) error {
-	// If neither option is set, there's nothing to inject
 	if proj.Speed == 0 && proj.BPM == 0 {
 		return nil
 	}
-	fstPttnIdx, err := fstPttnValid(proj.OrderList, proj.Patterns)
+	i, err := proj.IsFirstPatternValid()
 	if err != nil {
 		return err
 	}
-	// Prepare the targets we need to inject
 	commands, err := prepareCommands(proj.Speed, proj.BPM)
 	if err != nil {
 		return err
 	}
-	cmdIdx := injectCommands(proj, fstPttnIdx, commands)
-	// If we still have commands left over, row 0 was
-	// too saturated with user effects
+	cmdIdx := injectCommands(proj, i, commands)
 	if cmdIdx < uint8(len(commands)) {
-		return fmt.Errorf(ERR_PTTN_ZERO_FULL, fstPttnIdx)
+		return fmt.Errorf(ERR_PTTN_ZERO_FULL, i)
 	}
 	return nil
 }
@@ -195,7 +168,8 @@ func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
 		return out, fmt.Errorf(ERR_SAMPLE_TOO_LONG, inst.Name)
 	}
 	if dataLen%2 != 0 {
-		return out, fmt.Errorf(ERR_SAMPLE_LENGTH_ODD, inst.Name, dataLen)
+		return out, fmt.Errorf(ERR_SAMPLE_LENGTH_ODD,
+			inst.Name, dataLen)
 	}
 	// 2. Length (Stored in words)
 	binary.BigEndian.PutUint16(out[22:24], uint16(dataLen/2))
@@ -207,16 +181,21 @@ func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
 	}
 	out[25] = vol
 	// 4. Loop Points (Stored in words)
-	// If the loop length is 2 bytes or less, we treat it as an unlooped sample
-	if inst.RepeatLen <= 2 {
-		binary.BigEndian.PutUint16(out[26:28], 0) // Repeat Start = 0
-		binary.BigEndian.PutUint16(out[28:30], 1) // Repeat Length = 1 word (Amiga standard for no loop)
+	// If loop length is 2 bytes or less, treat it as unlooped
+	if inst.Length <= 2 {
+		// Start = 0, Length = 1 word (standard for no loop)
+		binary.BigEndian.PutUint16(out[26:28], 0)
+		binary.BigEndian.PutUint16(out[28:30], 1)
 	} else {
-		if inst.RepeatStart+inst.RepeatLen > uint32(dataLen) {
-			return out, fmt.Errorf(ERR_SAMPLE_LOOP_INVALID, inst.Name)
+		if inst.Start+inst.Length > uint32(dataLen) {
+			m := fmt.Errorf(ERR_SAMPLE_LOOP_INVALID,
+				inst.Name)
+			return out, m
 		}
-		binary.BigEndian.PutUint16(out[26:28], uint16(inst.RepeatStart/2))
-		binary.BigEndian.PutUint16(out[28:30], uint16(inst.RepeatLen/2))
+		s := inst.Start / 2
+		l := inst.Length / 2
+		binary.BigEndian.PutUint16(out[26:28], uint16(s))
+		binary.BigEndian.PutUint16(out[28:30], uint16(l))
 	}
 	return out, nil
 }
@@ -249,19 +228,31 @@ func injectAndCheck(proj *ModProject) error {
 	return err
 }
 
+func isSlotPopulated(slot *Instrument) bool {
+	//return (slot != nil)
+	return (slot.ID > 0)
+}
+
 // 0. Pre-process sparse instruments into a rigid 31-slot lookup map
-func preProcessInstruments(slots *[31]*Instrument, proj *ModProject) error {
-	for i := range proj.Instruments {
-		inst := &proj.Instruments[i]
-		if inst.ID < 1 || inst.ID > 31 {
-			return fmt.Errorf(ERR_INSTRUMENT_INVALID_ID, inst.Name, inst.ID)
+func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
+	var slots [31]Instrument
+	for _, i := range proj.Instruments {
+		if i.ID < 1 || i.ID > 31 {
+			m := fmt.Errorf(ERR_INSTRUMENT_INVALID_ID,
+				i.Name, i.ID)
+			return slots, m
 		}
-		if slots[inst.ID-1] != nil {
-			return fmt.Errorf(ERR_INSTRUMENT_DUPLICATE, inst.ID)
+		if slots[i.ID].ID > 0 {
+			m := fmt.Errorf(ERR_INSTRUMENT_DUPLICATE)
+			return slots, m
 		}
-		slots[inst.ID-1] = inst
+		slots[i.ID] = i
 	}
-	return nil
+//	for k := range slots {
+//		m := fmt.Sprintf("%d: %s", k, slots[k].Save())
+//		log.Println(m)
+//	}
+	return slots, nil
 }
 
 // 1. Write song title
@@ -275,31 +266,32 @@ func writeTitle(w io.Writer, title string) error {
 	return nil
 }
 
-// "If any of those raw files happen to have an odd byte length (which
-// occasionally happened with manual rips of those old Amiga disks),
-// you can simply append a single 0x00 byte to bassData before
-// assigning it to the struct to satisfy the strict word-length
-// constraint we built into encodeInstrumentHeader."
-// 2. Write 31 Sample Headers (30 bytes each)
-func writeSampleHeaders(w io.Writer, slots *[31]*Instrument) error {
-	for i := 0; i < 31; i++ {
-		if slots[i] != nil { // Slot is populated
-			headerBytes, err := encodeInstrumentHeader(*slots[i])
-			if err != nil {
-				return fmt.Errorf(ERR_INSTRUMENT_SLOT, i+1, err)
-			}
-			_, err = w.Write(headerBytes[:])
-			if err != nil {
-				return err
-			}
-		} else { // Slot is empty
-			emptySample := make([]byte, 30)
-			emptySample[29] = 0x01 // Repeat length = 1 word
-			_, err := w.Write(emptySample)
-			if err != nil {
-				return err
-			}
+func writeSampleHeader(w io.Writer, instr *Instrument) error {
+	var err error
+	if isSlotPopulated(instr) {
+		headerBytes, err := encodeInstrumentHeader(*instr)
+		if err != nil {
+			//fmt.Errorf(ERR_INSTRUMENT_SLOT, i+1, err)
+			return err
 		}
+		_, err = w.Write(headerBytes[:])
+	} else {
+		emptySample := make([]byte, 30)
+		emptySample[29] = 0x01 // Repeat length = 1 word
+		_, err = w.Write(emptySample)
+	}
+	return err
+}
+
+// 2. Write 31 Sample Headers (30 bytes each)
+func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
+	for i := 0; i < 31; i++ {
+		err := writeSampleHeader(w, &(slots[i]))
+		if err != nil {
+			return err
+		}
+//		m := fmt.Sprintf("%d: %s", i, slots[i].Save())
+//		log.Println(m)
 	}
 	return nil
 }
@@ -343,10 +335,10 @@ func writePatterns(w io.Writer, pttns []Pattern) error {
 }
 
 // 6. Write Raw PCM Sample Data block
-func writeSamples(w io.Writer, slots *[31]*Instrument) error {
+func writeSamples(w io.Writer, slots [31]Instrument) error {
 	for i := 0; i < 31; i++ {
 		d := slots[i].Data
-		if slots[i] != nil && len(d) > 0 {
+		if isSlotPopulated(&(slots[i])) && len(d) > 0 {
 			if _, err := w.Write(d); err != nil {
 				return err
 			}
@@ -355,22 +347,26 @@ func writeSamples(w io.Writer, slots *[31]*Instrument) error {
 	return nil
 }
 
-// WriteMod compiles proj into a binary ProTracker file stream.
-func WriteMod(w io.Writer, proj *ModProject) error {
-	var slots [31]*Instrument
-	err := injectAndCheck(proj)
+func writeHeaders(w io.Writer,
+	proj *ModProject) ([31]Instrument, error) {
+	slots, err := preProcessInstruments(proj)
 	if err != nil {
-		return err
+		return slots, err
 	}
-	err = preProcessInstruments(&slots, proj)
+	err = injectAndCheck(proj)
 	if err != nil {
-		return err
+		return slots, err
 	}
 	err = writeTitle(w, proj.Title)
 	if err != nil {
-		return err
+		return slots, err
 	}
-	err = writeSampleHeaders(w, &slots)
+	return slots, writeSampleHeaders(w, slots)
+}
+
+// WriteMod compiles proj into a binary ProTracker file stream.
+func WriteMod(w io.Writer, proj *ModProject) error {
+	slots, err := writeHeaders(w, proj)
 	if err != nil {
 		return err
 	}
@@ -386,5 +382,5 @@ func WriteMod(w io.Writer, proj *ModProject) error {
 	if err != nil {
 		return err
 	}
-	return writeSamples(w, &slots)
+	return writeSamples(w, slots)
 }

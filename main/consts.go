@@ -9,7 +9,6 @@ BPM:             {{ .BPM }}
 Pattern length:  64 rows (Len. 0x40h)
 Unique patterns: {{ .Patterns }}
 Order length:    {{ .OrderLen }}
-Samples:         {{ .Samples }}
 Instruments:     {{ .Instruments }}`
 
 // Formatting patterns.

@@ -14,12 +14,14 @@
     {
       "id": 1,
       "source": "st01",
-      "name": "ST-01/CloseHiHat"
+      "name": "ST-01/CloseHiHat",
+      "volume": 64
     },
     {
       "id": 3,
       "source": "st01",
       "name": "ST-01/Leader",
+      "volume": 64,
       "start": 2103,
       "length": 65
     },
@@ -27,6 +29,7 @@
       "id": 4,
       "source": "st01",
       "name": "ST-01/DigDug",
+      "volume": 64,
       "start": 2413,
       "length": 641
     },
@@ -34,6 +37,7 @@
       "id": 5,
       "source": "st01",
       "name": "ST-01/Heaven",
+      "volume": 64,
       "start": 6000,
       "length": 96
     }

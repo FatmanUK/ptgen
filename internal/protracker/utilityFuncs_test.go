@@ -4,5 +4,5 @@ import (
 	"testing"
 )
 
-func TestSample(t *testing.T) {
+func TestUtil(t *testing.T) {
 }
