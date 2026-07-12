@@ -243,7 +243,8 @@ func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
 			return slots, m
 		}
 		if slots[i.ID].ID > 0 {
-			m := fmt.Errorf(ERR_INSTRUMENT_DUPLICATE)
+			m := fmt.Errorf(ERR_INSTRUMENT_DUPLICATE,
+				i.ID)
 			return slots, m
 		}
 		slots[i.ID] = i
