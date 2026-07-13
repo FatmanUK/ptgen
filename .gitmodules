@@ -1,3 +1,0 @@
-[submodule "internal/fatgo"]
-	path = internal/fatgo
-	url = https://github.com/FatmanUK/fatgo.git
