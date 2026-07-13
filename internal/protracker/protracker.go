@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	//xlha "ptgen/internal/fatgo/xlha"
 	xlha "github.com/FatmanUK/fatgo/xlha"
 )
 
@@ -163,21 +162,50 @@ func injectInitialTempo(proj *ModProject) error {
 	return nil
 }
 
-// TODO: shorten
+// 1. Name (Padded/truncated to exactly 22 bytes)
+func encodeInstrumentTitle(out *[30]byte, inst Instrument) error {
+	copy((*out)[0:22], inst.Name)
+	dataLen := len(inst.Data)
+	if dataLen > 131070 {
+		return fmt.Errorf(ERR_SAMPLE_TOO_LONG, inst.Name)
+	}
+	if dataLen%2 != 0 {
+		return fmt.Errorf(ERR_SAMPLE_LENGTH_ODD,
+			inst.Name, dataLen)
+	}
+	return nil
+}
+
+// 4. Loop Points (Stored in words)
+// If loop length is 2 bytes or less, treat it as unlooped
+func encodeInstrumentLoop(out *[30]byte, inst Instrument) error {
+	if inst.Length <= 2 {
+		// Start = 0, Length = 1 word (standard for no loop)
+		binary.BigEndian.PutUint16((*out)[26:28], 0)
+		binary.BigEndian.PutUint16((*out)[28:30], 1)
+	} else {
+		if inst.Start+inst.Length > uint32(len(inst.Data)) {
+			m := fmt.Errorf(ERR_SAMPLE_LOOP_INVALID,
+				inst.Name)
+			return m
+		}
+		s := inst.Start / 2
+		l := inst.Length / 2
+		binary.BigEndian.PutUint16((*out)[26:28], uint16(s))
+		binary.BigEndian.PutUint16((*out)[28:30], uint16(l))
+	}
+	return nil
+}
+
 // Validates and packs a 30-byte ProTracker sample header.
 func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
 	var out [30]byte
-	// 1. Name (Padded/truncated to exactly 22 bytes)
-	copy(out[0:22], inst.Name)
-	dataLen := len(inst.Data)
-	if dataLen > 131070 {
-		return out, fmt.Errorf(ERR_SAMPLE_TOO_LONG, inst.Name)
-	}
-	if dataLen%2 != 0 {
-		return out, fmt.Errorf(ERR_SAMPLE_LENGTH_ODD,
-			inst.Name, dataLen)
+	err := encodeInstrumentTitle(&out, inst)
+	if err != nil {
+		return out, err
 	}
 	// 2. Length (Stored in words)
+	dataLen := len(inst.Data)
 	binary.BigEndian.PutUint16(out[22:24], uint16(dataLen/2))
 	// 3. Finetune & Volume
 	out[24] = inst.Finetune & 0x0F
@@ -186,24 +214,7 @@ func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
 		vol = 64
 	}
 	out[25] = vol
-	// 4. Loop Points (Stored in words)
-	// If loop length is 2 bytes or less, treat it as unlooped
-	if inst.Length <= 2 {
-		// Start = 0, Length = 1 word (standard for no loop)
-		binary.BigEndian.PutUint16(out[26:28], 0)
-		binary.BigEndian.PutUint16(out[28:30], 1)
-	} else {
-		if inst.Start+inst.Length > uint32(dataLen) {
-			m := fmt.Errorf(ERR_SAMPLE_LOOP_INVALID,
-				inst.Name)
-			return out, m
-		}
-		s := inst.Start / 2
-		l := inst.Length / 2
-		binary.BigEndian.PutUint16(out[26:28], uint16(s))
-		binary.BigEndian.PutUint16(out[28:30], uint16(l))
-	}
-	return out, nil
+	return out, encodeInstrumentLoop(&out, inst)
 }
 
 func writeCell(w io.Writer, row Row, p int, r int) error {
