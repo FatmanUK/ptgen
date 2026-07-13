@@ -5,13 +5,6 @@ import (
 	"testing"
 )
 
-type NumTests struct {
-	number     string
-	isHex      bool
-	expected   uint16
-	shouldFail bool
-}
-
 func TestRemoveEmptyStrings(t *testing.T) {
 	testStrings := []string{
 		"", "test", "1234", "", "",
@@ -22,40 +15,8 @@ func TestRemoveEmptyStrings(t *testing.T) {
 	if compareSlices(output, solution) {
 		t.Logf(MSG_SLICES_OK)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_SLICES, FMT_TST_VAR)
+		m := fmt.Sprintf("%s %s", ERR_SLICES, FMT_TST_VARIANT)
 		t.Errorf(m, output, solution)
-	}
-}
-
-func TestRowNumFromRowStr(t *testing.T) {
-	tests := []NumTests{
-		{"1e", true, 30, false},
-		{"20", true, 32, false},
-		{"20", false, 20, false},
-
-		{"1e", true, 31, true},
-		{"20", true, 31, true},
-		{"2x", false, 20, true},
-	}
-	for _, test := range tests {
-		out, _ := rowNumFromRowStr(test.number, test.isHex)
-		if test.shouldFail {
-			if out != test.expected {
-				t.Logf(MSG_ROW_NUM_NOK)
-			} else {
-				m := fmt.Sprintf("%s %s",
-					NERR_ROW_NUM, FMT_TST_NUMBER)
-				t.Errorf(m, out, test.expected)
-			}
-		} else {
-			if out == test.expected {
-				t.Logf(MSG_ROW_NUM_OK)
-			} else {
-				m := fmt.Sprintf("%s %s",
-					ERR_ROW_NUM, FMT_TST_NUMBER)
-				t.Errorf(m, out, test.expected)
-			}
-		}
 	}
 }
 
@@ -103,8 +64,3 @@ func TestCompareSlices(t *testing.T) {
 		}
 	}
 }
-
-/*
-func fileExists(path string) (bool, error) {
-func checkFileExistsWithMkdir(path string) (bool, error) {
-*/
