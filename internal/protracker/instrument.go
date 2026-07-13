@@ -15,12 +15,6 @@ import (
 // Start: Offset in BYTES
 // Length: Length in BYTES (0 means no loop)
 // Data: Raw 8-bit SIGNED PCM
-//
-// "If any of those raw files happen to have an odd byte length (which
-// occasionally happened with manual rips of those old Amiga disks),
-// you can simply append a single 0x00 byte to bassData before
-// assigning it to the struct to satisfy the strict word-length
-// constraint we built into encodeInstrumentHeader."
 type Instrument struct {
 	ID       uint8  `json:"id"`
 	Source   string `json:"source"`

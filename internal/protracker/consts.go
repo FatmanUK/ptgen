@@ -85,6 +85,11 @@ const ERR_INSTRUMENT_TOO_MANY = `a maximum of 31 instruments are supported`
 const ERR_INSTRUMENT_INVALID_ID = `instrument '%s' has invalid ID %d (must be 1-31)`
 const ERR_INSTRUMENT_DUPLICATE = `duplicate instrument ID %d detected`
 const ERR_INSTRUMENT_SLOT = `instrument slot %d error: %w`
+const ERR_ARCH_CACHE_DIR = `Didn't get user cache directory: %v`
+const ERR_ARCH_OPEN = `Failed to open archive: %v`
+const ERR_ARCH_HEADER_PARSE = `failed header parse: %v`
+const ERR_ARCH_EXTRACTION = `Extraction failed for file %s: %v`
+const ERR_ARCH_SIZE_MISMATCH = `Size mismatch for %s: expected %d bytes, extracted %d`
 
 // Test ok strings
 const MSG_CELL_NOTE_OK = `Note is ok.`
@@ -107,3 +112,10 @@ const MSG_MOD_BPM_OK = `BPM is ok.`
 const MSG_MOD_ORDER_OK = `OrderLen is ok.`
 const MSG_MOD_PTTN_OK = `Patterns is ok.`
 const MSG_MOD_LIST_OK = `OrderList is ok.`
+
+const MSG_ARCH_HEADER_PARSE_OK = `Processing file: %s (Method: %s, Original Size: %d)`
+
+const FILE_ST01 = `st-01.lha`
+const FILE_ST02 = `st-02.lha`
+
+const TMP_WRKRND_CMDLINE = `/usr/bin/lha evifw=%s %s %s`

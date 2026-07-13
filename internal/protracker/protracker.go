@@ -4,7 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
+	"os"
+	"path/filepath"
 	"strings"
+	//xlha "ptgen/internal/fatgo/xlha"
+	xlha "github.com/FatmanUK/fatgo/xlha"
 )
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
@@ -158,6 +163,7 @@ func injectInitialTempo(proj *ModProject) error {
 	return nil
 }
 
+// TODO: shorten
 // Validates and packs a 30-byte ProTracker sample header.
 func encodeInstrumentHeader(inst Instrument) ([30]byte, error) {
 	var out [30]byte
@@ -233,10 +239,115 @@ func isSlotPopulated(slot *Instrument) bool {
 	return (slot.ID > 0)
 }
 
+func prepareArchives() (map[string]string, error) {
+	archives := map[string]string{}
+	cache, err := os.UserCacheDir()
+	if err != nil {
+		return archives, err
+	}
+	archives["st01"] = filepath.Join(cache, "ptgen", FILE_ST01)
+	archives["st02"] = filepath.Join(cache, "ptgen", FILE_ST02)
+	return archives, nil
+}
+
+func temporaryWorkaroundWhileXlhaBroken(i Instrument,
+	data *[]byte) error {
+	archives, err := prepareArchives()
+	if err != nil {
+		return err
+	}
+	cache := filepath.Dir(archives["st01"])
+	wholeCmd := fmt.Sprintf(TMP_WRKRND_CMDLINE, cache,
+		archives[i.Source], i.Name)
+	log.Println(fmt.Sprintf("Command: %s", wholeCmd))
+	sampleFileName := filepath.Join(cache, filepath.Base(i.Name))
+	log.Println(fmt.Sprintf("Sample: %s", sampleFileName))
+	// TODO: run command, assumes lhasa lha command installed
+	sampleFile, err := os.Open(sampleFileName)
+	if err != nil {
+		return err
+	}
+	defer sampleFile.Close()
+	*data, err = io.ReadAll(sampleFile)
+	return err
+}
+
+func extractSamples(i Instrument) ([]byte, error) {
+	data := []byte{0}
+	files, err := prepareArchives()
+	if err != nil {
+		return data, fmt.Errorf(ERR_ARCH_CACHE_DIR, err)
+	}
+	file, err := os.Open(files[i.Source])
+	if err != nil {
+		return data, fmt.Errorf(ERR_ARCH_OPEN, err)
+	}
+	defer file.Close()
+	//*
+	err = temporaryWorkaroundWhileXlhaBroken(i, &data)
+	if err != nil {
+		return data, err
+	}
+	/*/
+		lhaReader := xlha.NewReader(file)
+		for {
+			isDone, err := extractSample(i.Name, lhaReader, &data)
+			if err != nil {
+				return data, err
+			}
+			if isDone {
+				break
+			}
+		}
+	//*/
+	return data, nil
+}
+
+func extractSample(n string, lr *xlha.Reader,
+	data *[]byte) (bool, error) {
+	h, err := lr.Next()
+	if err == io.EOF {
+		return true, nil
+	}
+	if err != nil {
+		return true, fmt.Errorf(ERR_ARCH_HEADER_PARSE, err)
+	}
+	log.Println(fmt.Sprintf(MSG_ARCH_HEADER_PARSE_OK, h.Name,
+		h.Method, h.OriginalSize))
+	*data, err = io.ReadAll(lr)
+	if err != nil {
+		return true, fmt.Errorf(ERR_ARCH_EXTRACTION,
+			h.Name, err)
+	}
+	written := uint32(len(*data))
+	if written != h.OriginalSize {
+		return true, fmt.Errorf(ERR_ARCH_SIZE_MISMATCH,
+			h.Name, h.OriginalSize, written)
+	}
+	if n == h.Name { // found our file
+		return true, nil
+	}
+	return false, nil
+}
+
+// "If any of those raw files happen to have an odd byte length (which
+// occasionally happened with manual rips of those old Amiga disks),
+// you can simply append a single 0x00 byte to bassData before
+// assigning it to the struct to satisfy the strict word-length
+// constraint we built into encodeInstrumentHeader."
+//
 // 0. Pre-process sparse instruments into a rigid 31-slot lookup map
 func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
 	var slots [31]Instrument
 	for _, i := range proj.Instruments {
+		d, err := extractSamples(i)
+		if len(d)%2 == 1 { // see comment above
+			d = append(d, 0x00)
+		}
+		i.Data = d
+		if err != nil {
+			return slots, err
+		}
 		if i.ID < 1 || i.ID > 31 {
 			m := fmt.Errorf(ERR_INSTRUMENT_INVALID_ID,
 				i.Name, i.ID)
@@ -247,12 +358,14 @@ func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
 				i.ID)
 			return slots, m
 		}
-		slots[i.ID] = i
+		// TODO: test i.ID ranges here. One too high so -1?
+		// Suspicious. Check instruments 1 and 31.
+		slots[i.ID-1] = i
 	}
-//	for k := range slots {
-//		m := fmt.Sprintf("%d: %s", k, slots[k].Save())
-//		log.Println(m)
-//	}
+	//	for k := range slots {
+	//		m := fmt.Sprintf("%d: %s", k, slots[k].Save())
+	//		log.Println(m)
+	//	}
 	return slots, nil
 }
 
@@ -276,10 +389,12 @@ func writeSampleHeader(w io.Writer, instr *Instrument) error {
 			return err
 		}
 		_, err = w.Write(headerBytes[:])
+		//log.Println(fmt.Sprintf("%v", headerBytes))
 	} else {
 		emptySample := make([]byte, 30)
 		emptySample[29] = 0x01 // Repeat length = 1 word
 		_, err = w.Write(emptySample)
+		//log.Println(fmt.Sprintf("%v", emptySample))
 	}
 	return err
 }
@@ -291,8 +406,10 @@ func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
 		if err != nil {
 			return err
 		}
-//		m := fmt.Sprintf("%d: %s", i, slots[i].Save())
-//		log.Println(m)
+		//		if slots[i].ID > 0 {
+		//			m := fmt.Sprintf("%d: %s", i, slots[i].Save())
+		//			log.Println(m)
+		//		}
 	}
 	return nil
 }
