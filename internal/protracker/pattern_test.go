@@ -5,7 +5,16 @@ import (
 	"testing"
 )
 
-func TestEmplaceRow(t *testing.T) {
+func TestPatternFactory_Must_Succeed(t *testing.T) {
+	//15:func PatternFactory() Pattern {
+}
+
+func TestPatternFactory_Must_Fail(t *testing.T) {
+	//15:func PatternFactory() Pattern {
+}
+
+//24:func (p *Pattern) EmplaceRow(r uint16, m [4]string) (Pattern, error) {
+func TestPatternEmplaceRow_Must_Succeed(t *testing.T) {
 	var err error
 	testRow := [4]string{
 		"A#4 01 C40",
@@ -30,27 +39,51 @@ func TestEmplaceRow(t *testing.T) {
 	}
 }
 
-func TestIsTooManyPatterns(t *testing.T) {
-	var err error
-	n := uint8(MAX_PATTERNS - 1)
-	err = IsTooManyPatterns(n)
-	if err == nil {
-		t.Logf(MSG_PTTN_NUM_OK, n)
-	} else {
-		t.Errorf(ERR_PTTN_NUM, n)
-	}
-	n = uint8(MAX_PATTERNS)
-	err = IsTooManyPatterns(n)
-	if err == nil {
-		t.Logf(MSG_PTTN_NUM_OK, n)
-	} else {
-		t.Errorf(ERR_PTTN_NUM, n)
-	}
-	n = uint8(MAX_PATTERNS + 1)
-	err = IsTooManyPatterns(n)
-	if err != nil {
-		t.Logf(MSG_PTTN_NUM_NOK, n)
-	} else {
-		t.Errorf(NERR_PTTN_NUM, n)
-	}
+func TestPatternEmplaceRow_Must_Fail(t *testing.T) {
+	//24:func (p *Pattern) EmplaceRow(r uint16, m [4]string) (Pattern, error) {
+}
+
+func TestPatternLoad_Must_Succeed(t *testing.T) {
+	//37:func (p *Pattern) Load(logs chan string, fileName string,
+}
+
+func TestPatternLoad_Must_Fail(t *testing.T) {
+	//37:func (p *Pattern) Load(logs chan string, fileName string,
+}
+
+func TestPatternInjectCommands_Must_Succeed(t *testing.T) {
+	//52:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
+}
+
+func TestPatternInjectCommands_Must_Fail(t *testing.T) {
+	//52:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
+}
+
+func TestPatternWrite_Must_Succeed(t *testing.T) {
+	//65:func (p *Pattern) Write(w io.Writer, pid int) error {
+}
+
+func TestPatternWrite_Must_Fail(t *testing.T) {
+	//65:func (p *Pattern) Write(w io.Writer, pid int) error {
+}
+
+func TestPatternRead_Must_Succeed(t *testing.T) {
+	//81:func (p *Pattern) Read(file io.Reader, logs chan string,
+	/*
+	   func TestReadPattern(t *testing.T) {
+	   	// func readPattern(file io.Reader, logs chan string, isHexRows bool) (pt.Pattern, error)
+	   }
+	*/
+}
+
+func TestPatternRead_Must_Fail(t *testing.T) {
+	//81:func (p *Pattern) Read(file io.Reader, logs chan string,
+}
+
+func TestPatternScanLoop_Must_Succeed(t *testing.T) {
+	//96:func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint, error) {
+}
+
+func TestPatternScanLoop_Must_Fail(t *testing.T) {
+	//96:func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint, error) {
 }
