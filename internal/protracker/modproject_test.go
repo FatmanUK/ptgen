@@ -93,32 +93,29 @@ func TestPopulatePatterns_Must_Fail(t *testing.T) {
 }
 
 func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
-	//115:func (p *ModProject) isTooManyPatterns() error {
 	/*
-	   func TestIsTooManyPatterns(t *testing.T) {
-	   	var err error
-	   	n := uint8(MAX_PATTERNS - 1)
-	   	err = IsTooManyPatterns(n)
-	   	if err == nil {
-	   		t.Logf(MSG_PTTN_NUM_OK, n)
-	   	} else {
-	   		t.Errorf(ERR_PTTN_NUM, n)
-	   	}
-	   	n = uint8(MAX_PATTERNS)
-	   	err = IsTooManyPatterns(n)
-	   	if err == nil {
-	   		t.Logf(MSG_PTTN_NUM_OK, n)
-	   	} else {
-	   		t.Errorf(ERR_PTTN_NUM, n)
-	   	}
-	   	n = uint8(MAX_PATTERNS + 1)
-	   	err = IsTooManyPatterns(n)
-	   	if err != nil {
-	   		t.Logf(MSG_PTTN_NUM_NOK, n)
-	   	} else {
-	   		t.Errorf(NERR_PTTN_NUM, n)
-	   	}
-	   }
+	var err error
+	n := uint8(MAX_PATTERNS - 1)
+	err = p.isTooManyPatterns(n)
+	if err == nil {
+		t.Logf(MSG_PTTN_NUM_OK, n)
+	} else {
+		t.Errorf(ERR_PTTN_NUM, n)
+	}
+	n = uint8(MAX_PATTERNS)
+	err = p.isTooManyPatterns(n)
+	if err == nil {
+		t.Logf(MSG_PTTN_NUM_OK, n)
+	} else {
+		t.Errorf(ERR_PTTN_NUM, n)
+	}
+	n = uint8(MAX_PATTERNS + 1)
+	err = p.isTooManyPatterns(n)
+	if err != nil {
+		t.Logf(MSG_PTTN_NUM_NOK, n)
+	} else {
+		t.Errorf(NERR_PTTN_NUM, n)
+	}
 	*/
 }
 

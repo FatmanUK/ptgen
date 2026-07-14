@@ -285,10 +285,9 @@ func (p *ModProject) DefaultOrderlist() []uint8 {
 	return orderList
 }
 
-func (p *ModProject) CalculateLength(logs chan string) {
+func (p *ModProject) CalculateLength() {
 	for k := range p.Instruments {
 		p.Instruments[k].CalculateLength()
-		logs <- p.Instruments[k].Save()
 	}
 }
 
@@ -308,7 +307,7 @@ func (p *ModProject) PopulateMetadata(logs chan string,
 		if err != nil {
 			return err
 		}
-		p.CalculateLength(logs)
+		p.CalculateLength()
 	}
 	if !p.isOrderListValid() {
 		err = fmt.Errorf(ERR_MOD_OLST)

@@ -118,6 +118,8 @@ const ERR_ROW_CELLX = `Cell %d is wrong.`
 const ERR_ROW_REGEX = `Regex is wrong.`
 const ERR_ROW_SAVE = `Save output is wrong.`
 const ERR_HEX_NOT_DETECTED = `Hex not detected.`
+const ERR_PTTN_NUM = `Pattern quantity (%d) is wrong.`
+const NERR_PTTN_NUM = `Pattern quantity (%d) is ok.`
 
 // Messages.
 const MSG_CHECKSUM_OK = `Checksum test passed.`
@@ -170,8 +172,6 @@ const FMT_TST_VAR_X = `\nExpected: [% X]\nGot:      [% X]`
 const ERR_CELL_FAILED = `Generic Cell failure: %v`
 const ERR_CELL_SUCCESS = `Should have failed but didn't.`
 const ERR_CELL_WRONG_ERROR = `Expected error message containing '%s', got '%v'`
-const ERR_PTTN_NUM = `Pattern quantity (%d) is wrong.`
-const NERR_PTTN_NUM = `Pattern quantity (%d) is ok.`
 
 // Test data.
 const MSG_PTTN_ARE_SEQ = `Patterns are sequential.`

@@ -4,8 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"os"
+	"os/exec"
+	"strings"
 	"path/filepath"
 )
 
@@ -57,14 +58,6 @@ func (i *Instrument) CalculateLength() {
 	if i.Start > 0 && i.End == 0 {
 		i.End = (i.Length + i.Start)
 	}
-}
-
-// Save: serialise struct to a string
-func (i *Instrument) Save() string {
-	m := `id:{%d} source:{%s} name:{%s} volume:{%d} finetune:{%d}`
-	m += ` start:{%d} length:{%d} end:{%d}`
-	return fmt.Sprintf(m, i.ID, i.Source, i.Name, i.Volume,
-		i.Finetune, i.Start, i.Length, i.End)
 }
 
 // 1. Name (Padded/truncated to exactly 22 bytes)
@@ -134,10 +127,14 @@ func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(data *[]byte) error {
 	cache := filepath.Dir(archives["st01"])
 	wholeCmd := fmt.Sprintf(TMP_WRKRND_CMDLINE, cache,
 		archives[i.Source], i.Name)
-	log.Println(fmt.Sprintf("Command: %s", wholeCmd))
 	sampleFileName := filepath.Join(cache, filepath.Base(i.Name))
-	log.Println(fmt.Sprintf("Sample: %s", sampleFileName))
-	// TODO: run command, assumes lhasa lha command installed
+	cmdArray := strings.Split(wholeCmd, " ")
+	// assumes lhasa lha command installed
+	cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
+	_, err = cmd.Output()
+	if err != nil {
+		return err
+	}
 	sampleFile, err := os.Open(sampleFileName)
 	if err != nil {
 		return err
@@ -164,16 +161,16 @@ func (i *Instrument) ExtractSample() ([]byte, error) {
 		return data, err
 	}
 	/*/
-		lhaReader := xlha.NewReader(file)
-		for {
-			isDone, err := extractSample(i.Name, lhaReader, &data)
-			if err != nil {
-				return data, err
-			}
-			if isDone {
-				break
-			}
+	lhaReader := xlha.NewReader(file)
+	for {
+		isDone, err := extractSample(i.Name, lhaReader, &data)
+		if err != nil {
+			return data, err
 		}
+		if isDone {
+			break
+		}
+	}
 	//*/
 	return data, nil
 }
