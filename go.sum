@@ -1,9 +1,16 @@
 github.com/FatmanUK/fatgo/docopt_helpers v0.0.0-20260423230453-42bf935d2be0 h1:mEON1Rd0+D5oceTeOpewi6Q3JFVJKZcAUIGvd3o3fWg=
 github.com/FatmanUK/fatgo/docopt_helpers v0.0.0-20260423230453-42bf935d2be0/go.mod h1:GMAnP7Z32VM/oug2uq6whw1d9w5CVDIcO3EZiS5gPik=
+github.com/FatmanUK/fatgo/utils v0.0.4 h1:MgQX8OPj+bH+RVtu2V8GZU3g6RSgjkGTNbNlur2oBek=
+github.com/FatmanUK/fatgo/utils v0.0.4/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
+github.com/FatmanUK/fatgo/utils v0.0.5 h1:AuzS3Er9dK/NRK6pPqz+Gqdyyi8NW8f92OzytVFkwHk=
+github.com/FatmanUK/fatgo/utils v0.0.5/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
+github.com/FatmanUK/fatgo/utils v0.0.6 h1:h5XvPRvy08YFt9g009wzt5YCFpRgnBD9L8Nh3QxIJ2M=
+github.com/FatmanUK/fatgo/utils v0.0.6/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
 github.com/FatmanUK/fatgo/xlha v0.0.1 h1:710rxNHH5xRxLjUoV9ycJGSrfnNDvaMlDmoXb9OBn0A=
 github.com/FatmanUK/fatgo/xlha v0.0.1/go.mod h1:Ik76axwupfGPyg1TloidEARa4tdbB4Jd+HuLreEPwLs=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
