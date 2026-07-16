@@ -30,10 +30,9 @@ func TestPatternEmplaceRow_Must_Succeed(t *testing.T) {
 	for n := 0; n < CHANNELS_PER_ROW; n++ {
 		s := p[0][n].Save()
 		if s == testRow[n] {
-			t.Logf(MSG_ROW_CELLX_OK, n)
+			t.Logf(TST_OK_ROW_CELL, n)
 		} else {
-			m := fmt.Sprintf("%s %s", ERR_ROW_CELLX,
-				FMT_TST_STRING)
+			m := fmt.Sprintf("%s %s", TST_NO_ROW_CELL, FMT_TST_STR)
 			t.Errorf(m, n, testRow[n], s)
 		}
 	}

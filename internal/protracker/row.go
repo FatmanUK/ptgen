@@ -6,6 +6,19 @@ import (
 	"strconv"
 )
 
+// These can be changed, if you don't want PT compatibility.
+const ROWS_PER_PATTERN = 64
+const CHANNELS_PER_ROW = 4
+
+// Regexes.
+const RGX_ROW = `(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s?`
+const RGX_ROWNUM = `[0-9A-Fa-f]{2}`
+const RGX_CELL_SEPARATOR = `[:|]`
+
+// Formatting patterns.
+const FMT_ROW_PRETTY = `(%02x) %s | %s | %s | %s |`
+const FMT_LOCATION = `Pattern %d, Row %d, Channel %d: %w`
+
 // A Row contains exactly CHANNELS_PER_ROW channels.
 type Row [CHANNELS_PER_ROW]Cell
 
@@ -45,16 +58,18 @@ func RowNumFromRowStr(rowStr string, isHex bool) (uint16, error) {
 // *in* the Row type.
 // Save: serialise struct to a string
 func (r *Row) Save(idx uint16) string {
+	if idx > 63 {
+		return ""
+	}
 	return fmt.Sprintf(FMT_ROW_PRETTY, idx, r[0].Save(),
 		r[1].Save(), r[2].Save(), r[3].Save())
 }
 
-func (r *Row) Write(w io.Writer, pid int, rid int) error {
-	for cid, c := range *r {
-		err := c.Write(w)
+func (r *Row) Write(w io.Writer, pi int, ri int) error {
+	for ci, cell := range *r {
+		err := cell.Write(w)
 		if err != nil {
-			m := fmt.Errorf(ERR_LOCATION,
-				pid, rid, cid, err)
+			m := fmt.Errorf(FMT_LOCATION, pi, ri, ci, err)
 			return m
 		}
 	}

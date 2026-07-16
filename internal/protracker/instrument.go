@@ -6,9 +6,31 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"path/filepath"
+	"strings"
 )
+
+const FILE_ST01 = `st-01.lha`
+const FILE_ST02 = `st-02.lha`
+
+const TMP_WRKRND_CMDLINE = `/usr/bin/lha evifw=%s %s %s`
+
+const ERR_INST_TOO_BIG = `sample '%s' exceeds max length of 131070 bytes`
+const ERR_INST_ODD = `sample '%s' must have an even byte length (got %d)`
+const ERR_INST_LOOP = `sample '%s' loop points exceed total sample length`
+const ERR_INST_CACHE = `Didn't get user cache directory: %v`
+const ERR_INST_OPEN = `Failed to open archive: %v`
+
+func prepareArchives() (map[string]string, error) {
+	archives := map[string]string{}
+	cache, err := os.UserCacheDir()
+	if err != nil {
+		return archives, err
+	}
+	archives["st01"] = filepath.Join(cache, "ptgen", FILE_ST01)
+	archives["st02"] = filepath.Join(cache, "ptgen", FILE_ST02)
+	return archives, nil
+}
 
 // Start, Length and End do not refer to the Instrument but rather the
 // forward loop (if present). Obviously, Start < End,
@@ -65,11 +87,10 @@ func (i *Instrument) encodeInstrumentTitle(out *[30]byte) error {
 	copy((*out)[0:22], i.Name)
 	dataLen := len(i.Data)
 	if dataLen > 131070 {
-		return fmt.Errorf(ERR_SAMPLE_TOO_LONG, i.Name)
+		return fmt.Errorf(ERR_INST_TOO_BIG, i.Name)
 	}
 	if dataLen%2 != 0 {
-		return fmt.Errorf(ERR_SAMPLE_LENGTH_ODD,
-			i.Name, dataLen)
+		return fmt.Errorf(ERR_INST_ODD, i.Name, dataLen)
 	}
 	return nil
 }
@@ -83,8 +104,7 @@ func (i *Instrument) encodeInstrumentLoop(out *[30]byte) error {
 		binary.BigEndian.PutUint16((*out)[28:30], 1)
 	} else {
 		if i.Start+i.Length > uint32(len(i.Data)) {
-			m := fmt.Errorf(ERR_SAMPLE_LOOP_INVALID,
-				i.Name)
+			m := fmt.Errorf(ERR_INST_LOOP, i.Name)
 			return m
 		}
 		s := i.Start / 2
@@ -148,11 +168,11 @@ func (i *Instrument) ExtractSample() ([]byte, error) {
 	data := []byte{0}
 	files, err := prepareArchives()
 	if err != nil {
-		return data, fmt.Errorf(ERR_ARCH_CACHE_DIR, err)
+		return data, fmt.Errorf(ERR_INST_CACHE, err)
 	}
 	file, err := os.Open(files[i.Source])
 	if err != nil {
-		return data, fmt.Errorf(ERR_ARCH_OPEN, err)
+		return data, fmt.Errorf(ERR_INST_OPEN, err)
 	}
 	defer file.Close()
 	//*

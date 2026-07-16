@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const LOG_TOTAL_ROWS_PROCESSED = `Total rows processed: %d`
+
 // A Pattern is a slice of ROWS_PER_PATTERN Rows.
 type Pattern [ROWS_PER_PATTERN]Row
 
@@ -79,7 +81,7 @@ type ScanData struct {
 }
 
 func (p *Pattern) Read(file io.Reader, logs chan string,
-	isHexRows bool) error {
+		isHexRows bool) error {
 	data := ScanData{
 		scanner:   bufio.NewScanner(file),
 		regex:     regexp.MustCompile(RowRegexFactory()),
@@ -89,7 +91,7 @@ func (p *Pattern) Read(file io.Reader, logs chan string,
 	if err != nil {
 		return err
 	}
-	logs <- fmt.Sprintf(MSG_TOTAL_ROWS_PROCESSED, rowsRead)
+	logs <- fmt.Sprintf(LOG_TOTAL_ROWS_PROCESSED, rowsRead)
 	return data.scanner.Err()
 }
 

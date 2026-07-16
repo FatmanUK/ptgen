@@ -2,8 +2,9 @@ package protracker
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 	"testing"
+	"github.com/FatmanUK/fatgo/utils"
 )
 
 type CellTestData struct {
@@ -18,28 +19,65 @@ type CellTestError struct {
 	expectedErr string
 }
 
+const TEST_CELL_STRING = `A#3 03 C38`
+
+//const FMT_TST_STR = `Exp: "%s" Got: "%s"`
+//const FMT_TST_NUM = `Exp:  %d  Got:  %d `
+//const FMT_TST_VAR = `Exp: "%v" Got: "%v"`
+
+const TST_OK_CELL_NOTE = `Note is ok.`
+const TST_NO_CELL_NOTE = ERR_CELL_NOTE
+
+const TST_OK_CELL_INST = `Instrument is ok.`
+const TST_NO_CELL_INST = ERR_CELL_INST
+
+const TST_OK_CELL_EFFT = `Effect is ok.`
+const TST_NO_CELL_EFFT = ERR_CELL_EFFT
+
+const TST_OK_CELL_REGEX = `Regex is ok.`
+const TST_NO_CELL_REGEX = `Regex is wrong.`
+
+const TST_OK_CELL_SAVE = `Save output is ok.`
+const TST_NO_CELL_SAVE = `Save output is wrong.`
+
+const TST_NO_CELL = `Generic Cell failure.`
+const TST_NO_SUCCESS = `Should have failed but didn't.`
+const TST_NO_WRONG_ERROR = `Wrong error message.`
+
+func breakUpTestString(cellData *Cell) error {
+	cellData.Note = TEST_CELL_STRING[0:3]
+	inst := TEST_CELL_STRING[4:6]
+	if inst == "--" {
+		inst = "00"
+	}
+	cellData.Effect = TEST_CELL_STRING[7:10]
+	i, err := utils.Uint8FromHexString(inst)
+	cellData.Instr = i
+	return err
+}
+
 func TestCellFactory_Must_Succeed(t *testing.T) {
 	c := CellFactory()
 	if c.Note == "---" {
-		t.Logf(MSG_CELL_NOTE_OK)
+		t.Logf(TST_OK_CELL_NOTE)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_NOTE,
-			FMT_TST_STRING)
-		t.Errorf(m, "---", c.Note)
+		msgPair := [2]string{TST_NO_CELL_NOTE, FMT_TST_STR}
+		valPair := [2]string{"---", c.Note}
+		utils.TErr(t, msgPair, valPair)
 	}
 	if c.Instr == 0 {
-		t.Logf(MSG_CELL_INST_OK)
+		t.Logf(TST_OK_CELL_INST)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_INST,
-			FMT_TST_NUMBER)
-		t.Errorf(m, 0, c.Instr)
+		msgPair := [2]string{TST_NO_CELL_INST, FMT_TST_NUM}
+		valPair := [2]uint8{0, c.Instr}
+		utils.TErr(t, msgPair, valPair)
 	}
 	if c.Effect == "---" {
-		t.Logf(MSG_CELL_EFFT_OK)
+		t.Logf(TST_OK_CELL_EFFT)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_EFFT,
-			FMT_TST_STRING)
-		t.Errorf(m, "---", c.Effect)
+		msgPair := [2]string{TST_NO_CELL_EFFT, FMT_TST_STR}
+		valPair := [2]string{"---", c.Effect}
+		utils.TErr(t, msgPair, valPair)
 	}
 }
 
@@ -48,36 +86,25 @@ func TestCellFactory_Must_Fail(t *testing.T) {
 
 func TestCellRegexFactory_Must_Succeed(t *testing.T) {
 	expectedRgx := fmt.Sprintf(RGX_CELL,
-		RGX_NOTE, RGX_INSTR, RGX_EFFECT,
-		RGX_NOTE, RGX_INSTR)
+		RGX_NOTE, RGX_INST, RGX_EFFT,
+		RGX_NOTE, RGX_INST)
 	r := CellRegexFactory()
 	if r == expectedRgx {
-		t.Logf(MSG_CELL_REGEX_OK)
+		t.Logf(TST_OK_CELL_REGEX)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_REGEX,
-			FMT_TST_STRING)
-		t.Errorf(m, expectedRgx, r)
+		msgPair := [2]string{TST_NO_CELL_REGEX, FMT_TST_STR}
+		valPair := [2]string{expectedRgx, r}
+		utils.TErr(t, msgPair, valPair)
 	}
 }
 
 func TestCellRegexFactory_Must_Fail(t *testing.T) {
 }
 
-func makeVars() (string, uint8, string, error) {
-	note := TEST_CELL_STRING[0:3]
-	effect := TEST_CELL_STRING[7:10]
-	instStr := TEST_CELL_STRING[4:6]
-	if instStr == "--" {
-		instStr = "00"
-	}
-	inst, err := strconv.ParseUint(instStr, 16, 8)
-	return note, uint8(inst), effect, err
-}
-
 func TestCellLoad_Must_Succeed(t *testing.T) {
-	var err error
 	c := CellFactory()
-	note, inst, effect, err := makeVars()
+	cellData := CellFactory()
+	err := breakUpTestString(&cellData)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -85,26 +112,26 @@ func TestCellLoad_Must_Succeed(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	if c.Note == note {
-		t.Logf(MSG_CELL_NOTE_OK)
+	if c.Note == cellData.Note {
+		t.Logf(TST_OK_CELL_NOTE)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_NOTE,
-			FMT_TST_STRING)
-		t.Errorf(m, note, c.Note)
+		msgPair := [2]string{TST_NO_CELL_NOTE, FMT_TST_STR}
+		valPair := [2]string{cellData.Note, c.Note}
+		utils.TErr(t, msgPair, valPair)
 	}
-	if c.Instr == inst {
-		t.Logf(MSG_CELL_INST_OK)
+	if c.Instr == cellData.Instr {
+		t.Logf(TST_OK_CELL_INST)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_INST,
-			FMT_TST_NUMBER)
-		t.Errorf(m, inst, c.Instr)
+		msgPair := [2]string{TST_NO_CELL_INST, FMT_TST_NUM}
+		valPair := [2]uint8{cellData.Instr, c.Instr}
+		utils.TErr(t, msgPair, valPair)
 	}
-	if c.Effect == effect {
-		t.Logf(MSG_CELL_EFFT_OK)
+	if c.Effect == cellData.Effect {
+		t.Logf(TST_OK_CELL_EFFT)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_EFFT,
-			FMT_TST_STRING)
-		t.Errorf(m, effect, c.Effect)
+		msgPair := [2]string{TST_NO_CELL_EFFT, FMT_TST_STR}
+		valPair := [2]string{cellData.Effect, c.Effect}
+		utils.TErr(t, msgPair, valPair)
 	}
 }
 
@@ -112,28 +139,25 @@ func TestCellLoad_Must_Fail(t *testing.T) {
 }
 
 func TestCellSave_Must_Succeed(t *testing.T) {
-	var err error
 	c := CellFactory()
-	c.Note, c.Instr, c.Effect, err = makeVars()
+	err := breakUpTestString(&c)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 	output := c.Save()
 	if output == TEST_CELL_STRING {
-		t.Logf(MSG_CELL_SAVE_OK)
+		t.Logf(TST_OK_CELL_SAVE)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_CELL_SAVE,
-			FMT_TST_STRING)
-		t.Errorf(m, TEST_CELL_STRING, output)
+		msgPair := [2]string{TST_NO_CELL_SAVE, FMT_TST_STR}
+		valPair := [2]string{TEST_CELL_STRING, output}
+		utils.TErr(t, msgPair, valPair)
 	}
 }
 
 func TestCellSave_Must_Fail(t *testing.T) {
 }
 
-/*
-// TestEncodeCell_Must_Succeed Matrix validates big-endian bitpacking output
-func TestEncodeCell_Valid(t *testing.T) {
+func TestEncodeCell_Must_Succeed(t *testing.T) {
 	t.Parallel()
 	var tests []CellTestData
 	cellBlank := Cell{Note: "", Instr: 0, Effect: ""}
@@ -205,16 +229,22 @@ func TestEncodeCell_Valid(t *testing.T) {
 	})
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			result, err := encodeCell(tt.input)
+			result, err := tt.input.Pack()
 			if err != nil {
-				t.Fatalf(ERR_CELL_FAILED, err)
+				msgPair := [2]string{
+					TST_NO_CELL, FMT_TST_STR}
+				valPair := [2][4]byte{
+					tt.expected, result}
+				utils.TErr(t, msgPair, valPair)
 			}
 			if result != tt.expected {
-				t.Errorf(FMT_TST_VAR_X, tt.expected,
-					result)
+				msgPair := [2]string{
+					TST_NO_CELL, FMT_TST_STR}
+				valPair := [2][4]byte{
+					tt.expected, result}
+				utils.TErr(t, msgPair, valPair)
 			}
 		})
 	}
@@ -235,32 +265,32 @@ func TestEncodeCell_Must_Fail(t *testing.T) {
 	tests = append(tests, CellTestError{
 		name:        "Octave below limit (B-2)",
 		input:       cellTooLow,
-		expectedErr: "Must be a valid note in octaves 3-5",
+		expectedErr: "Note is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Octave above limit (C-6)",
 		input:       cellTooHigh,
-		expectedErr: "Must be a valid note in octaves 3-5",
+		expectedErr: "Note is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Invalid note format name",
 		input:       cellRedDwarfError,
-		expectedErr: "Must be a valid note in octaves 3-5",
+		expectedErr: "Note is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Instrument range overflow (>31)",
 		input:       cellInstrTooHigh,
-		expectedErr: "Instrument 32 is wrong",
+		expectedErr: "Instrument is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Effect string length underflow",
 		input:       cellEffectTooShort,
-		expectedErr: "Must be 3 hex characters",
+		expectedErr: "Effect is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Effect string length overflow",
 		input:       cellEffectTooLong,
-		expectedErr: "Must be 3 hex characters",
+		expectedErr: "Effect is wrong",
 	})
 	tests = append(tests, CellTestError{
 		name:        "Non-hex effect command byte",
@@ -274,23 +304,25 @@ func TestEncodeCell_Must_Fail(t *testing.T) {
 	})
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			_, err := encodeCell(tt.input)
+			_, err := tt.input.Pack()
 			if err == nil {
-				t.Fatalf(ERR_CELL_SUCCESS)
+				t.Fatalf(TST_NO_SUCCESS)
 			}
 			hasSubstr := strings.Contains(err.Error(),
 				tt.expectedErr)
 			if !hasSubstr {
-				t.Errorf(ERR_CELL_WRONG_ERROR,
-					tt.expectedErr, err)
+				msgPair := [2]string{
+					TST_NO_WRONG_ERROR,
+					FMT_TST_STR}
+				valPair := [2]string{
+					tt.expectedErr, err.Error()}
+				utils.TErr(t, msgPair, valPair)
 			}
 		})
 	}
 }
-*/
 
 func TestCellGetPeriod_Must_Succeed(t *testing.T) {
 	//82:func (c *Cell) getPeriod() uint16 {

@@ -5,7 +5,21 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"github.com/FatmanUK/fatgo/utils"
 )
+
+const RGX_NOTE = `[A-G-][-#][3-5-]`
+const RGX_INST = `[0-9A-F-]{2}`
+const RGX_EFFT = `[0-9A-F-]{3}`
+const RGX_CELL = `%s %s %s|%s %s|\.\.\.|---|-`
+
+const ERR_STR = `Actual value: "%s"`
+
+const ERR_CELL_NOTE = `Note is wrong. Must be A-G# in octaves 3-5.`
+const ERR_CELL_INST = `Instrument is wrong. Minimum 1, maximum 31.`
+const ERR_CELL_EFFT = `Effect is wrong. Must be 3 hex characters.`
+const ERR_CELL_CMMD = `Invalid effect command.`
+const ERR_CELL_PARM = `Invalid effect parameter.`
 
 // Amiga PAL periods for octaves 3, 4, and 5.
 var periodMap = map[string]uint16{
@@ -39,9 +53,8 @@ func CellFactory() Cell {
 }
 
 func CellRegexFactory() string {
-	return fmt.Sprintf(RGX_CELL,
-		RGX_NOTE, RGX_INSTR, RGX_EFFECT,
-		RGX_NOTE, RGX_INSTR)
+	return fmt.Sprintf(RGX_CELL, RGX_NOTE, RGX_INST, RGX_EFFT,
+		RGX_NOTE, RGX_INST)
 }
 
 // Load: deserialise struct from a string
@@ -94,13 +107,14 @@ func (c *Cell) getEffectCommand() (uint8, error) {
 	var err error
 	if c.Effect != "" && c.Effect != "000" && c.Effect != "---" {
 		if len(c.Effect) != 3 {
-			return 0, fmt.Errorf(ERR_CELL_EFFT, c.Effect)
+			msgPair := [2]string{ERR_CELL_EFFT, ERR_STR}
+			return 0, utils.Err(msgPair, c.Effect, nil)
 		}
 		cmdStr := c.Effect[0:1]
-		cmd, err = uint8FromHexString(cmdStr)
+		cmd, err = utils.Uint8FromHexString(cmdStr)
 		if err != nil {
-			return 0, fmt.Errorf(ERR_CELL_EFFT_CMMD,
-				cmdStr, err)
+			msgPair := [2]string{ERR_CELL_CMMD, ERR_STR}
+			return 0, utils.Err(msgPair, cmdStr, err)
 		}
 	}
 	return cmd, err
@@ -111,13 +125,14 @@ func (c *Cell) getEffectParameter() (uint8, error) {
 	var err error
 	if c.Effect != "" && c.Effect != "000" && c.Effect != "---" {
 		if len(c.Effect) != 3 {
-			return 0, fmt.Errorf(ERR_CELL_EFFT, c.Effect)
+			msgPair := [2]string{ERR_CELL_EFFT, ERR_STR}
+			return 0, utils.Err(msgPair, c.Effect, nil)
 		}
 		paramStr := c.Effect[1:3]
-		param, err = uint8FromHexString(paramStr)
+		param, err = utils.Uint8FromHexString(paramStr)
 		if err != nil {
-			return 0, fmt.Errorf(ERR_CELL_EFFT_PARAM,
-				paramStr, err)
+			msgPair := [2]string{ERR_CELL_PARM, ERR_STR}
+			return 0, utils.Err(msgPair, paramStr, err)
 		}
 	}
 	return param, err
@@ -140,10 +155,12 @@ func (c *Cell) Pack() ([4]byte, error) {
 	var out [4]byte
 	period := c.getPeriod()
 	if period == 0 && c.Note != "" && c.Note != "---" {
-		return out, fmt.Errorf(ERR_CELL_NOTE, c.Note)
+		msgPair := [2]string{ERR_CELL_NOTE, ERR_STR}
+		return out, utils.Err(msgPair, c.Note, nil)
 	}
 	if c.Instr > 31 {
-		return out, fmt.Errorf(ERR_CELL_INST, c.Instr)
+		msgPair := [2]string{ERR_CELL_INST, ERR_STR}
+		return out, utils.Err(msgPair, c.Instr, nil)
 	}
 	cmd, err := c.getEffectCommand()
 	if err != nil {

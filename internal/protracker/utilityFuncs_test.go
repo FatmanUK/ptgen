@@ -4,23 +4,17 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+	"github.com/FatmanUK/fatgo/utils"
 )
 
-func TestTemplateFactory_Must_Succeed(t *testing.T) {
-	//15:func TemplateFactory(name string, format string) *template.Template {
-}
+const SAMPLE2_PTTN_COUNT = 4
+const SAMPLE2_PTTN_DIR = `test_data/sample2`
 
-func TestTemplateFactory_Must_Fail(t *testing.T) {
-	//15:func TemplateFactory(name string, format string) *template.Template {
-}
+const MSG_HEX_DETECTED = `Hex detected.`
+const ERR_HEX_NOT_DETECTED = `Hex not detected.`
 
-func TestMustPrepTemplate_Must_Succeed(t *testing.T) {
-	//21:func MustPrepTemplate(name string, formatString string,
-}
-
-func TestMustPrepTemplate_Must_Fail(t *testing.T) {
-	//21:func MustPrepTemplate(name string, formatString string,
-}
+const MSG_MOD_PTTN_COUNT_OK = `Pattern count is ok.`
+const ERR_MOD_PTTN_COUNT = `Pattern count is wrong.`
 
 func TestIsHexDetected_Must_Succeed(t *testing.T) {
 	adjustedPath := filepath.Join("..", "..", SAMPLE2_PTTN_DIR)
@@ -29,7 +23,7 @@ func TestIsHexDetected_Must_Succeed(t *testing.T) {
 		t.Log(MSG_HEX_DETECTED)
 	} else {
 		m := fmt.Sprintf("%s %s", ERR_HEX_NOT_DETECTED,
-			FMT_TST_VARIANT)
+			FMT_TST_VAR)
 		t.Errorf(m, err)
 	}
 }
@@ -47,9 +41,9 @@ func TestCheckHex_Must_Fail(t *testing.T) {
 }
 
 func TestCountPatterns_Must_Succeed(t *testing.T) {
-	adjustedPath := filepath.Join("..", "..", SAMPLE2_PTTN_DIR)
+	path := filepath.Join("..", "..", SAMPLE2_PTTN_DIR)
 	expectedCount := uint8(SAMPLE2_PTTN_COUNT)
-	output, err := CountPatterns(adjustedPath)
+	output, err := utils.CountMatchingFiles(path, RGX_PTTN_FILE)
 	if err != nil {
 		t.Log(err)
 	}
@@ -57,7 +51,7 @@ func TestCountPatterns_Must_Succeed(t *testing.T) {
 		t.Log(MSG_MOD_PTTN_COUNT_OK)
 	} else {
 		m := fmt.Sprintf("%s %s", ERR_MOD_PTTN_COUNT,
-			FMT_TST_NUMBER)
+			FMT_TST_NUM)
 		t.Errorf(m, expectedCount, output)
 	}
 }

@@ -5,27 +5,46 @@ import (
 	"testing"
 )
 
+//const FMT_TST_STR = `Exp: "%s" Got: "%s"`
+//const FMT_TST_NUM = `Exp:  %d  Got:  %d `
+//const FMT_TST_VAR = `Exp: "%v" Got: "%v"`
+
+const TST_OK_MOD_TITLE = `Title is ok.`
+const TST_NO_MOD_TITLE = `Title is wrong.`
+
+const TST_OK_MOD_SPEED = `Speed is ok.`
+const TST_NO_MOD_SPEED = `Speed is wrong.`
+
+const TST_OK_MOD_BPM = `BPM is ok.`
+const TST_NO_MOD_BPM = `BPM is wrong.`
+
+const TST_OK_MOD_OLEN = `OrderLen is ok.`
+const TST_NO_MOD_OLEN = `OrderLen is wrong.`
+
+const TST_OK_MOD_PTTN = `Patterns is ok.`
+const TST_NO_MOD_PTTN = `Patterns is wrong.`
+
+const TST_OK_MOD_OLST = `OrderList is ok.`
+const TST_NO_MOD_OLST = `OrderList is wrong.`
+
 func TestModProjectFactory_Must_Succeed(t *testing.T) {
 	p := ModProjectFactory()
 	if p.Title == DEFAULT_TITLE {
-		t.Logf(MSG_MOD_TITLE_OK)
+		t.Logf(TST_OK_MOD_TITLE)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_TITLE,
-			FMT_TST_STRING)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_TITLE, FMT_TST_STR)
 		t.Errorf(m, DEFAULT_TITLE, p.Title)
 	}
 	if p.Speed == DEFAULT_SPEED {
-		t.Logf(MSG_MOD_SPEED_OK)
+		t.Logf(TST_OK_MOD_SPEED)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_SPEED,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_SPEED, FMT_TST_NUM)
 		t.Errorf(m, DEFAULT_SPEED, p.Speed)
 	}
 	if p.BPM == DEFAULT_BPM {
-		t.Logf(MSG_MOD_BPM_OK)
+		t.Logf(TST_OK_MOD_BPM)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_BPM,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_BPM, FMT_TST_NUM)
 		t.Errorf(m, DEFAULT_BPM, p.BPM)
 	}
 }
@@ -37,38 +56,33 @@ func TestModInfoFactory_Must_Succeed(t *testing.T) {
 	p := ModProjectFactory()
 	i := p.ModInfoFactory()
 	if i.Title == DEFAULT_TITLE {
-		t.Logf(MSG_MOD_TITLE_OK)
+		t.Logf(TST_OK_MOD_TITLE)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_TITLE,
-			FMT_TST_STRING)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_TITLE, FMT_TST_STR)
 		t.Errorf(m, DEFAULT_TITLE, i.Title)
 	}
 	if i.Speed == DEFAULT_SPEED {
-		t.Logf(MSG_MOD_SPEED_OK)
+		t.Logf(TST_OK_MOD_SPEED)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_SPEED,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_SPEED, FMT_TST_NUM)
 		t.Errorf(m, DEFAULT_SPEED, i.Speed)
 	}
 	if i.BPM == DEFAULT_BPM {
-		t.Logf(MSG_MOD_BPM_OK)
+		t.Logf(TST_OK_MOD_BPM)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_BPM,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_BPM, FMT_TST_NUM)
 		t.Errorf(m, DEFAULT_BPM, i.BPM)
 	}
 	if i.OrderLen == 1 {
-		t.Logf(MSG_MOD_ORDER_OK)
+		t.Logf(TST_OK_MOD_OLEN)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_ORDER,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_OLEN, FMT_TST_NUM)
 		t.Errorf(m, 1, i.OrderLen)
 	}
 	if i.Patterns == 1 {
-		t.Logf(MSG_MOD_PTTN_OK)
+		t.Logf(TST_OK_MOD_PTTN)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_MOD_PTTN,
-			FMT_TST_NUMBER)
+		m := fmt.Sprintf("%s %s", TST_NO_MOD_PTTN, FMT_TST_NUM)
 		t.Errorf(m, 1, i.Patterns)
 	}
 }
@@ -93,7 +107,7 @@ func TestPopulatePatterns_Must_Fail(t *testing.T) {
 }
 
 func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
-	/*
+/*
 	var err error
 	n := uint8(MAX_PATTERNS - 1)
 	err = p.isTooManyPatterns(n)
@@ -116,7 +130,7 @@ func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
 	} else {
 		t.Errorf(NERR_PTTN_NUM, n)
 	}
-	*/
+*/
 }
 
 func TestIsTooManyPatterns_Must_Fail(t *testing.T) {
@@ -126,9 +140,9 @@ func TestIsTooManyPatterns_Must_Fail(t *testing.T) {
 func TestIsOrderListValid_Must_Succeed(t *testing.T) {
 	p := ModProjectFactory()
 	if p.isOrderListValid() {
-		t.Logf(MSG_MOD_LIST_OK)
+		t.Logf(TST_OK_MOD_OLST)
 	} else {
-		t.Errorf(ERR_MOD_LIST)
+		t.Errorf(TST_NO_MOD_OLST)
 	}
 }
 
@@ -190,9 +204,9 @@ func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
 	proj.Patterns = []Pattern{pttn, pttn, pttn, pttn, pttn}
 	proj.OrderList = proj.DefaultOrderlist()
 	if proj.isOrderListValid() {
-		t.Logf(MSG_MOD_OLST_OK)
+		t.Logf(TST_OK_MOD_OLST)
 	} else {
-		t.Errorf(ERR_MOD_OLST)
+		t.Errorf(TST_NO_MOD_OLST)
 	}
 }
 

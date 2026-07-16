@@ -5,11 +5,64 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/FatmanUK/fatgo/utils"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"path/filepath"
 )
+
+const MetadataFmt = `Mod metadata:
+Song Title:      {{ .Title }}
+Format:          ProTracker-compatible MOD
+Channels:        4
+Speed:           {{ .Speed }}
+BPM:             {{ .BPM }}
+Pattern length:  64 rows (Len. 0x40h)
+Unique patterns: {{ .Patterns }}
+Order length:    {{ .OrderLen }}
+Instruments:     {{ .Instruments }}`
+
+// Limits.
+const MAX_PATTERNS = 128 // or 64 ? Gemini seems undecided.
+const MAX_ORDER_LIST = MAX_PATTERNS
+
+// These are just defaults.
+const DEFAULT_TITLE = `A Song With No Name`
+const DEFAULT_SPEED = 6
+const DEFAULT_BPM = 125
+
+// Warnings.
+const MOD_TOO_BIG_KB = 50
+const MOD_TOO_BIG_BYTES = (MOD_TOO_BIG_KB * 1024)
+
+const LOG_WRN_TOO_BIG = `Mod is unusually large (>%d bytes).`
+const LOG_WRN_TOO_BIG_KB = `Mod is unusually large (>%d kB).`
+const LOG_LOADING_FILE = `Loading %s.`
+const LOG_LOADING_PTTNS = `Loading patterns.`
+const LOG_JSON_DETECTED = `JSON metadata detected.`
+const LOG_YAML_DETECTED = `YAML metadata detected.`
+const LOG_LOADING_METADATA = `Loading metadata and pattern order.`
+
+const FMT_PTTN_FILE = `pattern%02x.txt`
+
+const RGX_PTTN_FILE = `^pattern[0-9A-Fa-f]{2}\.txt$`
+
+const ERR_MOD_INJECT = `Tempo injection error: %w`
+const ERR_MOD_ORDER_LIST = `Order list is wrong.`
+const ERR_MOD_TITLE_LONG = `Title is too long.`
+const ERR_MOD_LIST = `OrderList is wrong.`
+const ERR_MOD_LIST_EMPTY = ERR_MOD_LIST + ` Must not be empty.`
+const ERR_MOD_LIST_OOB = ERR_MOD_LIST + ` Invalid pattern reference %d.`
+const ERR_MOD_LIST_OVERFLOW = ERR_MOD_LIST + ` Maximum 128 items.` // TODO: is this right? 128 is max patterns, also max orderlist?
+
+const ERR_INST_TOO_MANY = `a maximum of 31 instruments are supported`
+const ERR_INST_INVALID_ID = `instrument '%s' has invalid ID %d (must be 1-31)`
+const ERR_INST_DUPE = `duplicate instrument ID %d detected`
+const ERR_INST_SLOT = `instrument slot %d error: %w`
+
+const ERR_PTTN_TOO_MANY = `Too many patterns.`
+const ERR_PTTN_ZERO_FULL = `Injection failed. Row 0 of first pattern %d has insufficient empty effect slots`
 
 type ModInfo struct {
 	Title       string
@@ -61,7 +114,7 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 	var buf bytes.Buffer
 	var err error
 	info := p.ModInfoFactory()
-	output := MustPrepTemplate("output", MetadataString, info)
+	output := utils.MustPrepTemplate("output", MetadataFmt, info)
 	logs <- string(output)
 	if len(p.Title) > 20 { // title less than 21 bytes
 		return fmt.Errorf(ERR_MOD_TITLE_LONG)
@@ -79,8 +132,8 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 		return err
 	}
 	if buf.Len() > MOD_TOO_BIG_BYTES {
-		logs <- fmt.Sprintf(MSG_WRN_TOO_BIG_KB,
-			buf.Len()/1024, MOD_TOO_BIG_KB)
+		//logs <- fmt.Sprintf(LOG_WRN_TOO_BIG_KB,
+		//	buf.Len()/1024, MOD_TOO_BIG_KB)
 	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err
@@ -90,8 +143,8 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 // Requires the patterns formatted in plain text.
 func (p *ModProject) PopulatePatterns(logs chan string,
 	path string) error {
-	logs <- MSG_LOADING_PTTNS
-	numPttns, err := CountPatterns(path)
+	logs <- LOG_LOADING_PTTNS
+	numPttns, err := utils.CountMatchingFiles(path, RGX_PTTN_FILE)
 	if err != nil {
 		return err
 	}
@@ -101,8 +154,8 @@ func (p *ModProject) PopulatePatterns(logs chan string,
 	}
 	p.Patterns = make([]Pattern, numPttns)
 	for i := range p.Patterns {
-		fileName := fmt.Sprintf(MSG_PTTN_FILE, i)
-		logs <- fmt.Sprintf(MSG_LOADING_FILE, fileName)
+		fileName := fmt.Sprintf(FMT_PTTN_FILE, i)
+		logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
 		fullPath := filepath.Join(path, fileName)
 		err = p.Patterns[i].Load(logs, fullPath, hex)
 		if err != nil {
@@ -188,12 +241,12 @@ func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 			return slots, err
 		}
 		if i.ID < 1 || i.ID > 31 {
-			m := fmt.Errorf(ERR_INSTRUMENT_INVALID_ID,
+			m := fmt.Errorf(ERR_INST_INVALID_ID,
 				i.Name, i.ID)
 			return slots, m
 		}
 		if slots[i.ID].ID > 0 {
-			m := fmt.Errorf(ERR_INSTRUMENT_DUPLICATE,
+			m := fmt.Errorf(ERR_INST_DUPE,
 				i.ID)
 			return slots, m
 		}
@@ -216,13 +269,13 @@ func (p *ModProject) writeHeaders(
 	}
 	err = p.injectInitialTempo()
 	if err != nil {
-		return slots, fmt.Errorf(ERR_INJECT, err)
+		return slots, fmt.Errorf(ERR_MOD_INJECT, err)
 	}
 	if !p.isOrderListValid() {
 		return slots, fmt.Errorf(ERR_MOD_LIST)
 	}
 	if len(p.Instruments) > 31 {
-		return slots, fmt.Errorf(ERR_INSTRUMENT_TOO_MANY)
+		return slots, fmt.Errorf(ERR_INST_TOO_MANY)
 	}
 	err = writeTitle(w, p.Title)
 	if err != nil {
@@ -264,13 +317,13 @@ func (p *ModProject) ReadMetadata(logs chan string,
 		return err
 	}
 	if json.Valid(content) {
-		logs <- MSG_JSON_DETECTED
+		logs <- LOG_JSON_DETECTED
 		err = json.NewDecoder(file).Decode(p)
 	} else {
 		var node yaml.Node
 		err = yaml.Unmarshal(content, &node)
 		if err == nil {
-			logs <- MSG_YAML_DETECTED
+			logs <- LOG_YAML_DETECTED
 			err = yaml.NewDecoder(file).Decode(p)
 		}
 	}
@@ -297,7 +350,7 @@ func (p *ModProject) PopulateMetadata(logs chan string,
 	var err error
 	p.OrderList = p.DefaultOrderlist()
 	if fileName != "<nil>" {
-		logs <- MSG_LOADING_METADATA
+		logs <- LOG_LOADING_METADATA
 		file, err := os.Open(fileName)
 		if err != nil {
 			return err
@@ -310,7 +363,7 @@ func (p *ModProject) PopulateMetadata(logs chan string,
 		p.CalculateLength()
 	}
 	if !p.isOrderListValid() {
-		err = fmt.Errorf(ERR_MOD_OLST)
+		err = fmt.Errorf(ERR_MOD_ORDER_LIST)
 	}
 	return err
 }

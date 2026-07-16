@@ -11,18 +11,26 @@ import (
 // WriteMod compiles proj into a binary ProTracker file stream.
 // Populate proj, run WriteMod and the file appears in w.
 
+const ERR_CELL_EFFT_SPEED = `Invalid initial speed. Maximum 31.`
+const ERR_CELL_EFFT_BPM = `Invalid initial BPM. Minimum 32.`
+
+// Magic bytes.
+const MAGIC_BYTES = `M.K.`
+
 func prepareCommands(s uint8, b uint8) ([]string, error) {
 	var commands []string
 	if s > 0 {
 		if s >= 32 {
-			err := fmt.Errorf(ERR_CELL_EFFT_SPEED, s)
+//			err := fmt.Errorf(ERR_CELL_EFFT_SPEED, s)
+			err := fmt.Errorf(ERR_CELL_EFFT_SPEED)
 			return commands, err
 		}
 		commands = append(commands, fmt.Sprintf("F%02X", s))
 	}
 	if b > 0 {
 		if b < 32 {
-			err := fmt.Errorf(ERR_CELL_EFFT_BPM, b)
+//			err := fmt.Errorf(ERR_CELL_EFFT_BPM, b)
+			err := fmt.Errorf(ERR_CELL_EFFT_BPM)
 			return commands, err
 		}
 		commands = append(commands, fmt.Sprintf("F%02X", b))

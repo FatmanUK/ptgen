@@ -10,7 +10,29 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"github.com/FatmanUK/fatgo/utils"
 )
+
+const FMT_HTTP_STATUS = `HTTP Status Code: %d`
+
+const ERR_DL_HEX_INVALID = `Invalid hex string. %v`
+const ERR_DL_CHECKSUM = `Checksum mismatch`
+
+const LOG_DL_IN_MEMORY = `Downloaded in memory.`
+const LOG_DL_CHECKSUM_OK = `Checksum test passed.`
+const LOG_DL_REQUEST = `Requesting sample archive download.`
+const LOG_DL_STATUS_OK = `Download request succeeded.`
+const LOG_DL_DOWNLOAD = `Downloading from %s. Saving as %s.`
+const LOG_DL_PAUSE = `Pausing for %d seconds.`
+
+// Arbitrary constants.
+const URL_ST01 = `https://aminet.net/mods/inst/st-01.lha`
+const URL_ST02 = `https://aminet.net/mods/inst/st-02.lha`
+
+const SHA256_ST01 = `8bd8c62d542de794a5f843b5351de1c6f1bed8f7d7643a24a04d0ad8ce962553`
+const SHA256_ST02 = `3ffbbf30e652a65aa47d08afd976990f67e2f9de5cbce171706d2c813d8dbce9`
+
+const SAFETY_PAUSE_S = 2
 
 type FileSource struct {
 	Ref         string
@@ -30,7 +52,7 @@ func (re *SHA256Sum) IsChecksumMatch(blob *[]byte) (bool, error) {
 	actualSum := sha256.Sum256(*blob)
 	expectedBytes, err := hex.DecodeString(string(re.BytesHex))
 	if err != nil {
-		return false, fmt.Errorf(ERR_HEX_INVALID, err)
+		return false, fmt.Errorf(ERR_DL_HEX_INVALID, err)
 	}
 	if subtle.ConstantTimeCompare(actualSum[:],
 		expectedBytes) == 1 {
@@ -45,7 +67,8 @@ type DownloadFile struct {
 	ExpectedSum SHA256Sum
 }
 
-func DownloadFileFactory(url string, e SHA256Sum, cache string) DownloadFile {
+func DownloadFileFactory(url string, e SHA256Sum,
+		cache string) DownloadFile {
 	cache = filepath.Join(cache, "ptgen")
 	d := filepath.Join(cache, filepath.Base(url))
 	return DownloadFile{
@@ -60,25 +83,25 @@ func (re *DownloadFile) IsChecksumMatch(blob *[]byte) (bool, error) {
 }
 
 func (re *DownloadFile) Validate(r io.ReadCloser,
-	logs chan string) ([]byte, error) {
+		logs chan string) ([]byte, error) {
 	blob, err := io.ReadAll(r)
 	if err != nil {
 		return blob, err
 	}
-	logs <- MSG_DOWNLOAD_IN_MEM
+	logs <- LOG_DL_IN_MEMORY
 	isChecksumOK, err := re.IsChecksumMatch(&blob)
 	if err != nil {
 		return blob, err
 	}
 	if !isChecksumOK {
-		return blob, fmt.Errorf(ERR_CHECKSUM_MISMATCH)
+		return blob, fmt.Errorf(ERR_DL_CHECKSUM)
 	}
-	logs <- MSG_CHECKSUM_OK
+	logs <- LOG_DL_CHECKSUM_OK
 	return blob, nil
 }
 
 func (re *DownloadFile) BlobFromURI(logs chan string) error {
-	logs <- MSG_REQUEST_DOWNLOAD
+	logs <- LOG_DL_REQUEST
 	resp, err := http.Get(re.Remote)
 	if err != nil {
 		return err
@@ -88,7 +111,7 @@ func (re *DownloadFile) BlobFromURI(logs chan string) error {
 	if sc != 200 {
 		return fmt.Errorf(FMT_HTTP_STATUS, sc)
 	}
-	logs <- MSG_DOWNLOAD_STATUS_OK
+	logs <- LOG_DL_STATUS_OK
 	blob, err := re.Validate(resp.Body, logs)
 	if err != nil {
 		return err
@@ -100,10 +123,11 @@ func (re *DownloadFile) BlobFromURI(logs chan string) error {
 	return nil
 }
 
+// TODO: is this a bit kak-handed? Try and improve.
 // Find the user cache dir. Create source mappings
 // ("ref"=>("https://url","local/file")). Decide on mappings depending
 // which sample refs are selected.
-func DecideSources(samples []Instrument) (map[string]DownloadFile, error) {
+func DecideSources(s []Instrument) (map[string]DownloadFile, error) {
 	st01 := []byte(SHA256_ST01)
 	st02 := []byte(SHA256_ST02)
 	sources := []FileSource{
@@ -120,28 +144,29 @@ func DecideSources(samples []Instrument) (map[string]DownloadFile, error) {
 		downloads[m.Ref] = DownloadFileFactory(m.URL,
 			m.ExpectedSum, cache)
 	}
-	for _, s := range samples {
-		chosen[s.Source] = downloads[s.Source]
+	for _, sample := range s {
+		chosen[sample.Source] = downloads[sample.Source]
 	}
 	return chosen, nil
 }
 
 // Has delay to prevent abuse/damage to Aminet. Also checks checksums.
-func Download(downloads map[string]DownloadFile, logs chan string) error {
+func Download(downloads map[string]DownloadFile,
+		logs chan string) error {
 	for _, v := range downloads {
-		exists, err := CheckFileExistsWithMkdir(v.Local)
+		exists, err := utils.IsFileExists(v.Local, true)
 		if err != nil {
 			return err
 		}
 		if exists {
 			continue
 		}
-		logs <- fmt.Sprintf(MSG_DOWNLOAD, v.Remote, v.Local)
+		logs <- fmt.Sprintf(LOG_DL_DOWNLOAD, v.Remote, v.Local)
 		err = v.BlobFromURI(logs)
 		if err != nil {
 			return err
 		}
-		logs <- fmt.Sprintf(MSG_SAFETY_PAUSE, SAFETY_PAUSE_S)
+		logs <- fmt.Sprintf(LOG_DL_PAUSE, SAFETY_PAUSE_S)
 		time.Sleep(SAFETY_PAUSE_S * time.Second)
 	}
 	return nil
