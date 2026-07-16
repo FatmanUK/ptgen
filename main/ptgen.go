@@ -2,12 +2,14 @@ package main
 
 import (
 	doh "github.com/FatmanUK/fatgo/docopt_helpers"
+	"fmt"
 	"log"
 	pt "ptgen/internal/protracker"
 	"strings"
+	"github.com/FatmanUK/fatgo/utils"
 )
 
-const docoptString = `{{ .Name }} {{ .Version }}
+const docoptFmt = `{{ .Name }} {{ .Version }}
 
 Outputs the binary data directly to stdout, so redirect it to a file.
 
@@ -38,6 +40,12 @@ func DocOptVarsFactory() DocOptVars {
 	}
 }
 
+func (d *DocOptVars) ProcessArgs() (map[string]any, error) {
+	ds := string(utils.MustPrepTemplate("docopt", docoptFmt, *d))
+	av := fmt.Sprintf("%s %s", d.Name, d.Version)
+	return doh.NoExitParser.ParseArgs(ds, nil, av)
+}
+
 func panicIfNotNil(err error) {
 	if err != nil {
 		panic(err)
@@ -46,33 +54,34 @@ func panicIfNotNil(err error) {
 
 func threadGenerate(logs chan string, metaFile any, patternPath any) {
 	defer close(logs)
-	var err error
-	pttns := stringFromAny(patternPath)
-	meta := stringFromAny(metaFile)
 	proj := pt.ModProjectFactory()
-	err = proj.PopulatePatterns(logs, pttns)
+	p := utils.StringFromAny(patternPath)
+	err := proj.PopulatePatterns(logs, p)
 	panicIfNotNil(err)
-	err = proj.PopulateMetadata(logs, meta)
+	m := utils.StringFromAny(metaFile)
+	err = proj.PopulateMetadata(logs, m)
 	panicIfNotNil(err)
 	err = proj.OutputEverything(logs)
 	panicIfNotNil(err)
 }
 
+func threadLog(logs chan string) {
+	for msg := range logs {
+		msgs := strings.Split(msg, "\\n")
+		for _, m := range utils.RemoveEmptyStrings(msgs) {
+			log.Println(m)
+		}
+	}
+}
+
 func main() {
 	dotv := DocOptVarsFactory()
-	ds := string(MustPrepTemplate("docopt", docoptString, dotv))
-	appVer := dotv.Name + " " + dotv.Version
-	args, err := doh.NoExitParser.ParseArgs(ds, nil, appVer)
+	args, err := dotv.ProcessArgs()
 	if args == nil { // All done, exit here.
 		return
 	}
 	panicIfNotNil(err)
 	logs := make(chan string)
 	go threadGenerate(logs, args["-m"], args["-p"])
-	for msg := range logs {
-		msgs := strings.Split(msg, "\\n")
-		for _, m := range removeEmptyStrings(msgs) {
-			log.Println(m)
-		}
-	}
+	threadLog(logs)
 }
