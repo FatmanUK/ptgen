@@ -25,6 +25,12 @@ const TST_NO_ROW_SAVE = `Save output is wrong.`
 const TST_OK_ROW_SAVE_NO = `Save errors, but that's ok.`
 const TST_NO_ROW_SAVE_OK = `Save doesn't error, but that's wrong.`
 
+const TST_OK_ROW_WRITE = `Write is ok.`
+const TST_NO_ROW_WRITE = `Write is wrong.`
+
+const TST_OK_ROW_WRITE_NO = `Write is wrong, but that's ok.`
+const TST_NO_ROW_WRITE_OK = `Write is ok, but that's wrong.`
+
 type NumTests struct {
 	number     string
 	isHex      bool
@@ -119,7 +125,7 @@ func TestRowSave_Must_Succeed(t *testing.T) {
 	r := RowFactory()
 	emptyCell := CellFactory()
 	blank := emptyCell.Save()
-	for rn := uint16(42); rn < 64; rn += 4 { // 42 46 50 54 58 62
+	for rn := uint8(42); rn < 64; rn += 4 { // 42 46 50 54 58 62
 		s := r.Save(rn)
 		expected := fmt.Sprintf(FMT_ROW_PRETTY, rn,
 			blank, blank, blank, blank)
@@ -137,7 +143,7 @@ func TestRowSave_Must_Fail(t *testing.T) {
 	var errMsg [2]string
 	r := RowFactory()
 	expected := ""
-	for rn := uint16(64); rn < 88; rn += 4 { // 64 68 72 76 80 84
+	for rn := uint8(64); rn < 88; rn += 4 { // 64 68 72 76 80 84
 		s := r.Save(rn)
 		errMsg = [2]string{TST_NO_ROW_SAVE_OK, FMT_TST_STR}
 		if s == expected {
@@ -149,27 +155,91 @@ func TestRowSave_Must_Fail(t *testing.T) {
 	}
 }
 
-type BytesWriter []byte
+// Don't love this, but it creates a persistent datum in a temporary.
+type BytesWriter struct {
+	data *[]byte
+}
 
-// Usage: fmt.Fprint(&bw, "Appended data")
+func (b *BytesWriter) Init() {
+	b.data = &[]byte{}
+}
+
 func (b BytesWriter) Write(p []byte) (int, error) {
-    b = append(b, p...)
-    return len(p), nil
+	oldLen := len(*(b.data))
+	newLen := oldLen + len(p)
+	newData := make([]byte, newLen)
+	if oldLen > 0 {
+		copy(newData[0:oldLen], *(b.data))
+	}
+	copy(newData[oldLen:], p)
+	*(b.data) = newData
+	return len(p), nil
+}
+
+func (b BytesWriter) Bytes() []byte {
+	if b.data == nil {
+		return []byte{}
+	}
+	return *(b.data)
 }
 
 func TestRowWrite_Must_Succeed(t *testing.T) {
-	//var errMsg [2]string
-	w := BytesWriter{}
+	var w BytesWriter
+	w.Init()
+
 	r := RowFactory()
-	err := r.Write(w, 0, 0) // pattern id, row id --- TODO: test limits
+	r[0] = Cell{"A#4", 1, "F06"}
+	r[1] = Cell{"C#4", 2, "C40"}
+	r[2] = Cell{"F#4", 3, "484"}
+	r[3] = Cell{"G#4", 4, "E00"}
+	expected := "[0 240 31 6 1 148 44 64 1 46 52 132 1 13 78 0]"
+
+	patternIndex := uint8(0)
+	rowIndex := uint8(0)
+
+	err := r.Write(w, patternIndex, rowIndex) // TODO: test limits
 	if err != nil {
 		t.Fatalf("Error writing Row: %v", err)
 	}
-	// TODO: hm - returning blank right now
-	t.Logf("Bytes:[%v]", w)
+
+	s := fmt.Sprintf("%v", w.Bytes())
+	if s == expected {
+		t.Logf(TST_OK_ROW_WRITE)
+	} else {
+		errMsg := [2]string{TST_NO_ROW_WRITE, FMT_TST_STR}
+		valPair := [2]string{expected, s}
+		utils.TErr(t, errMsg, valPair)
+	}
 }
 
 func TestRowWrite_Must_Fail(t *testing.T) {
-//	var errMsg [2]string
-	//52:func (r *Row) Write(w io.Writer, pid int, rid int) error {
+	var w BytesWriter
+	w.Init()
+
+	r := RowFactory()
+	r[0] = Cell{"A#4", 1, "F06"}
+	r[1] = Cell{"C#4", 2, "C40"}
+	r[2] = Cell{"F#4", 3, "484"}
+	r[3] = Cell{"G#4", 4, "E00"}
+	// TODO put together proper test data
+	expected := "[0 240 31 6 1 148 44 64 1 46 52 132 1 13 78 1]"
+
+	patternIndex := uint8(0)
+	rowIndex := uint8(0)
+
+	err := r.Write(w, patternIndex, rowIndex) // TODO: test limits
+	if err != nil {
+		t.Fatalf("Error writing Row: %v", err)
+	}
+
+	s := fmt.Sprintf("%v", w.Bytes())
+	if s != expected {
+		t.Logf(TST_OK_ROW_WRITE_NO)
+	} else {
+		// TODO
+		// logic needs check... tired brain no understands...
+		errMsg := [2]string{TST_NO_ROW_WRITE_OK, FMT_TST_STR}
+		valPair := [2]string{expected, s}
+		utils.TErr(t, errMsg, valPair)
+	}
 }

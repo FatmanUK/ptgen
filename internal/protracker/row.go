@@ -57,7 +57,7 @@ func RowNumFromRowStr(rowStr string, isHex bool) (uint16, error) {
 // to the Row's nature or function, so I don't include the identifier
 // *in* the Row type.
 // Save: serialise struct to a string
-func (r *Row) Save(idx uint16) string {
+func (r *Row) Save(idx uint8) string {
 	if idx > 63 {
 		return ""
 	}
@@ -65,7 +65,7 @@ func (r *Row) Save(idx uint16) string {
 		r[1].Save(), r[2].Save(), r[3].Save())
 }
 
-func (r *Row) Write(w io.Writer, pi int, ri int) error {
+func (r *Row) Write(w io.Writer, pi uint8, ri uint8) error {
 	for ci, cell := range *r {
 		err := cell.Write(w)
 		if err != nil {
