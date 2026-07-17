@@ -23,7 +23,7 @@ func PatternFactory() Pattern {
 }
 
 // Emplace a Row in a Pattern from an array of pre-Cell strings
-func (p *Pattern) EmplaceRow(r uint16, m [4]string) (Pattern, error) {
+func (p *Pattern) EmplaceRow(r uint8, m [4]string) (Pattern, error) {
 	var err error
 	for i := 0; i < CHANNELS_PER_ROW; i++ {
 		(*p)[r][i] = CellFactory()
@@ -64,9 +64,9 @@ func (p *Pattern) InjectCommands(cmmds []string) uint8 {
 	return cmdIdx
 }
 
-func (p *Pattern) Write(w io.Writer, pid int) error {
+func (p *Pattern) Write(w io.Writer, pid uint8) error {
 	for rid, r := range *p {
-		err := r.Write(w, pid, rid)
+		err := r.Write(w, pid, uint8(rid))
 		if err != nil {
 			return err
 		}
@@ -95,8 +95,8 @@ func (p *Pattern) Read(file io.Reader, logs chan string,
 	return data.scanner.Err()
 }
 
-func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint, error) {
-	var rowsRead uint
+func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint8, error) {
+	var rowsRead uint8
 	for d.scanner.Scan() {
 		m := d.regex.FindStringSubmatch(d.scanner.Text())
 		if len(m) == 0 {

@@ -34,7 +34,7 @@ const TST_NO_ROW_WRITE_OK = `Write is ok, but that's wrong.`
 type NumTests struct {
 	number     string
 	isHex      bool
-	expected   uint16
+	expected   uint8
 }
 
 // Only defining succeed as it's too simple for fail conditions.
@@ -92,7 +92,7 @@ func TestRowNumFromRowStr_Must_Succeed(t *testing.T) {
 	errMsg = [2]string{TST_NO_ROW_NUM, FMT_TST_NUM}
 	for _, test := range tests {
 		out, _ := RowNumFromRowStr(test.number, test.isHex)
-		valPair := [2]uint16{out, test.expected}
+		valPair := [2]uint8{out, test.expected}
 		if out == test.expected {
 			t.Logf(TST_OK_ROW_NUM)
 		} else {
@@ -111,7 +111,7 @@ func TestRowNumFromRowStr_Must_Fail(t *testing.T) {
 	errMsg = [2]string{TST_NO_ROW_NUM_OK, FMT_TST_NUM}
 	for _, test := range tests {
 		out, _ := RowNumFromRowStr(test.number, test.isHex)
-		valPair := [2]uint16{out, test.expected}
+		valPair := [2]uint8{out, test.expected}
 		if out != test.expected {
 			t.Logf(TST_OK_ROW_NUM_NO)
 		} else {
@@ -155,53 +155,20 @@ func TestRowSave_Must_Fail(t *testing.T) {
 	}
 }
 
-// Don't love this, but it creates a persistent datum in a temporary.
-type BytesWriter struct {
-	data *[]byte
-}
-
-func (b *BytesWriter) Init() {
-	b.data = &[]byte{}
-}
-
-func (b BytesWriter) Write(p []byte) (int, error) {
-	oldLen := len(*(b.data))
-	newLen := oldLen + len(p)
-	newData := make([]byte, newLen)
-	if oldLen > 0 {
-		copy(newData[0:oldLen], *(b.data))
-	}
-	copy(newData[oldLen:], p)
-	*(b.data) = newData
-	return len(p), nil
-}
-
-func (b BytesWriter) Bytes() []byte {
-	if b.data == nil {
-		return []byte{}
-	}
-	return *(b.data)
-}
-
 func TestRowWrite_Must_Succeed(t *testing.T) {
-	var w BytesWriter
-	w.Init()
-
+	var w AwfulUnsafeWriter
 	r := RowFactory()
 	r[0] = Cell{"A#4", 1, "F06"}
 	r[1] = Cell{"C#4", 2, "C40"}
 	r[2] = Cell{"F#4", 3, "484"}
 	r[3] = Cell{"G#4", 4, "E00"}
 	expected := "[0 240 31 6 1 148 44 64 1 46 52 132 1 13 78 0]"
-
 	patternIndex := uint8(0)
 	rowIndex := uint8(0)
-
 	err := r.Write(w, patternIndex, rowIndex) // TODO: test limits
 	if err != nil {
 		t.Fatalf("Error writing Row: %v", err)
 	}
-
 	s := fmt.Sprintf("%v", w.Bytes())
 	if s == expected {
 		t.Logf(TST_OK_ROW_WRITE)
@@ -213,25 +180,20 @@ func TestRowWrite_Must_Succeed(t *testing.T) {
 }
 
 func TestRowWrite_Must_Fail(t *testing.T) {
-	var w BytesWriter
-	w.Init()
-
+	var w AwfulUnsafeWriter
 	r := RowFactory()
 	r[0] = Cell{"A#4", 1, "F06"}
 	r[1] = Cell{"C#4", 2, "C40"}
 	r[2] = Cell{"F#4", 3, "484"}
 	r[3] = Cell{"G#4", 4, "E00"}
-	// TODO put together proper test data
+	// TODO proper test data, I just changed a digit from above
 	expected := "[0 240 31 6 1 148 44 64 1 46 52 132 1 13 78 1]"
-
 	patternIndex := uint8(0)
 	rowIndex := uint8(0)
-
 	err := r.Write(w, patternIndex, rowIndex) // TODO: test limits
 	if err != nil {
 		t.Fatalf("Error writing Row: %v", err)
 	}
-
 	s := fmt.Sprintf("%v", w.Bytes())
 	if s != expected {
 		t.Logf(TST_OK_ROW_WRITE_NO)

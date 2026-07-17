@@ -1,11 +1,19 @@
 package protracker
 
 import (
-	//	"bytes"
+	//"bytes"
 	"testing"
 )
 
 // Mostly written by Google Gemini Pro. Tweaked extensively by me.
+
+//20:func prepareCommands(s uint8, b uint8) ([]string, error) {
+//42:func writeTitle(w io.Writer, title string) error {
+//53:func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
+//68:func writeOrderList(w io.Writer, orderList []uint8) error {
+//84:func writeMagic(w io.Writer) error {
+//94:func writePatterns(w io.Writer, pttns []Pattern) error {
+//105:func writeSamples(w io.Writer, slots [31]Instrument) error {
 
 /*
 type ModProjectTestError struct {

@@ -39,16 +39,16 @@ func RowRegexFactory() string {
 		cellRgx, RGX_CELL_SEPARATOR)
 }
 
-func RowNumFromRowStr(rowStr string, isHex bool) (uint16, error) {
+func RowNumFromRowStr(rowStr string, isHex bool) (uint8, error) {
 	rowBase := 10
 	if isHex {
 		rowBase = 16
 	}
-	u, err := strconv.ParseUint(rowStr, rowBase, 16)
+	u, err := strconv.ParseUint(rowStr, rowBase, 8)
 	if err != nil {
 		return 0, err
 	}
-	return uint16(u), nil
+	return uint8(u), nil
 }
 
 // I could have left the row index out of this, but Rows are never

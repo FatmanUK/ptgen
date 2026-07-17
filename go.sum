@@ -6,6 +6,8 @@ github.com/FatmanUK/fatgo/utils v0.0.5 h1:AuzS3Er9dK/NRK6pPqz+Gqdyyi8NW8f92OzytV
 github.com/FatmanUK/fatgo/utils v0.0.5/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
 github.com/FatmanUK/fatgo/utils v0.0.6 h1:h5XvPRvy08YFt9g009wzt5YCFpRgnBD9L8Nh3QxIJ2M=
 github.com/FatmanUK/fatgo/utils v0.0.6/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
+github.com/FatmanUK/fatgo/utils v0.0.7 h1:cYwtBxOTXDgzSLk8ECy/z4nsStDkbL9nC/Gqu2Pl5zk=
+github.com/FatmanUK/fatgo/utils v0.0.7/go.mod h1:cGrzmrrFLBEiGgc3YZ1t9S4OdIomNfl53mxCaItH1KE=
 github.com/FatmanUK/fatgo/xlha v0.0.1 h1:710rxNHH5xRxLjUoV9ycJGSrfnNDvaMlDmoXb9OBn0A=
 github.com/FatmanUK/fatgo/xlha v0.0.1/go.mod h1:Ik76axwupfGPyg1TloidEARa4tdbB4Jd+HuLreEPwLs=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=

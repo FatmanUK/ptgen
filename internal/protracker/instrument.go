@@ -8,29 +8,16 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"github.com/FatmanUK/fatgo/utils"
+	"github.com/FatmanUK/fatgo/xlha"
 )
-
-const FILE_ST01 = `st-01.lha`
-const FILE_ST02 = `st-02.lha`
 
 const TMP_WRKRND_CMDLINE = `/usr/bin/lha evifw=%s %s %s`
 
 const ERR_INST_TOO_BIG = `sample '%s' exceeds max length of 131070 bytes`
 const ERR_INST_ODD = `sample '%s' must have an even byte length (got %d)`
 const ERR_INST_LOOP = `sample '%s' loop points exceed total sample length`
-const ERR_INST_CACHE = `Didn't get user cache directory: %v`
 const ERR_INST_OPEN = `Failed to open archive: %v`
-
-func prepareArchives() (map[string]string, error) {
-	archives := map[string]string{}
-	cache, err := os.UserCacheDir()
-	if err != nil {
-		return archives, err
-	}
-	archives["st01"] = filepath.Join(cache, "ptgen", FILE_ST01)
-	archives["st02"] = filepath.Join(cache, "ptgen", FILE_ST02)
-	return archives, nil
-}
 
 // Start, Length and End do not refer to the Instrument but rather the
 // forward loop (if present). Obviously, Start < End,
@@ -82,19 +69,6 @@ func (i *Instrument) CalculateLength() {
 	}
 }
 
-// 1. Name (Padded/truncated to exactly 22 bytes)
-func (i *Instrument) encodeInstrumentTitle(out *[30]byte) error {
-	copy((*out)[0:22], i.Name)
-	dataLen := len(i.Data)
-	if dataLen > 131070 {
-		return fmt.Errorf(ERR_INST_TOO_BIG, i.Name)
-	}
-	if dataLen%2 != 0 {
-		return fmt.Errorf(ERR_INST_ODD, i.Name, dataLen)
-	}
-	return nil
-}
-
 // 4. Loop Points (Stored in words)
 // If loop length is 2 bytes or less, treat it as unlooped
 func (i *Instrument) encodeInstrumentLoop(out *[30]byte) error {
@@ -118,12 +92,16 @@ func (i *Instrument) encodeInstrumentLoop(out *[30]byte) error {
 // Validates and packs a 30-byte ProTracker sample header.
 func (i *Instrument) encodeInstrumentHeader() ([30]byte, error) {
 	var out [30]byte
-	err := i.encodeInstrumentTitle(&out)
-	if err != nil {
-		return out, err
+	// 1. Name (Padded/truncated to exactly 22 bytes)
+	copy(out[0:22], i.Name)
+	dataLen := len(i.Data)
+	if dataLen > 131070 {
+		return out, fmt.Errorf(ERR_INST_TOO_BIG, i.Name)
+	}
+	if dataLen%2 != 0 {
+		return out, fmt.Errorf(ERR_INST_ODD, i.Name, dataLen)
 	}
 	// 2. Length (Stored in words)
-	dataLen := len(i.Data)
 	binary.BigEndian.PutUint16(out[22:24], uint16(dataLen/2))
 	// 3. Finetune & Volume
 	out[24] = i.Finetune & 0x0F
@@ -139,15 +117,11 @@ func (i *Instrument) isSlotPopulated() bool {
 	return (i.ID > 0)
 }
 
-func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(data *[]byte) error {
-	archives, err := prepareArchives()
-	if err != nil {
-		return err
-	}
-	cache := filepath.Dir(archives["st01"])
+func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(arch SampleArchive, data *[]byte) error {
+	var err error
+	cache := filepath.Dir(arch.File)
 	wholeCmd := fmt.Sprintf(TMP_WRKRND_CMDLINE, cache,
-		archives[i.Source], i.Name)
-	sampleFileName := filepath.Join(cache, filepath.Base(i.Name))
+		arch.File, i.Name)
 	cmdArray := strings.Split(wholeCmd, " ")
 	// assumes lhasa lha command installed
 	cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
@@ -155,7 +129,8 @@ func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(data *[]byte) error {
 	if err != nil {
 		return err
 	}
-	sampleFile, err := os.Open(sampleFileName)
+	sampleName := filepath.Base(i.Name)
+	sampleFile, err := os.Open(filepath.Join(cache, sampleName))
 	if err != nil {
 		return err
 	}
@@ -164,35 +139,60 @@ func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(data *[]byte) error {
 	return err
 }
 
-func (i *Instrument) ExtractSample() ([]byte, error) {
-	data := []byte{0}
-	files, err := prepareArchives()
-	if err != nil {
-		return data, fmt.Errorf(ERR_INST_CACHE, err)
+func (i *Instrument) lhaLoop(lhaReader *xlha.Reader,
+		data *[]byte) (bool, error) {
+	h, err := lhaReader.Next()
+	if err == io.EOF {
+		return true, err
 	}
-	file, err := os.Open(files[i.Source])
 	if err != nil {
-		return data, fmt.Errorf(ERR_INST_OPEN, err)
+		//return fmt.Errorf(ERR_ARCH_HEADER_PARSE, err)
+		return false, err
+	}
+	//log.Println(fmt.Sprintf(MSG_ARCH_HEADER_PARSE_OK, h.Name, h.Method, h.OriginalSize))
+	*data, err = io.ReadAll(lhaReader)
+	if err != nil {
+		//return fmt.Errorf(ERR_ARCH_EXTRACTION, h.Name, err)
+		return false, err
+	}
+	written := uint32(len(*data))
+	if written != h.OriginalSize {
+		return false, fmt.Errorf(ERR_ARCH_SIZE_MISMATCH,
+			h.Name, h.OriginalSize, written)
+	}
+	if i.Name == h.Name { // found our file
+		return true, nil
+	}
+	return false, nil
+}
+
+func (i *Instrument) lhaFile(arch SampleArchive, data *[]byte) error {
+	file, err := os.Open(arch.File)
+	if err != nil {
+		return fmt.Errorf(ERR_INST_OPEN, err)
 	}
 	defer file.Close()
-	//*
-	err = i.temporaryWorkaroundWhileXlhaBroken(&data)
+	lhaReader := xlha.NewReader(file)
+	for isDone := false; !isDone; {
+		isDone, err = i.lhaLoop(lhaReader, data)
+	}
+	return err
+}
+
+func (i *Instrument) ExtractSample() ([]byte, error) {
+	data := []byte{0}
+	arch := archiveMap[i.Source]
+	cache, err := utils.GetUserAppCacheDir("ptgen")
 	if err != nil {
 		return data, err
 	}
+	arch.File = filepath.Join(cache, arch.File)
+	//*
+	err = i.temporaryWorkaroundWhileXlhaBroken(arch, &data)
 	/*/
-	lhaReader := xlha.NewReader(file)
-	for {
-		isDone, err := extractSample(i.Name, lhaReader, &data)
-		if err != nil {
-			return data, err
-		}
-		if isDone {
-			break
-		}
-	}
+	err = i.lhaFile(arch, &data)
 	//*/
-	return data, nil
+	return data, err
 }
 
 func (i *Instrument) WriteHeader(w io.Writer) error {

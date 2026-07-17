@@ -93,7 +93,7 @@ func writeMagic(w io.Writer) error {
 // <129 patterns. =64 rows. =4 channels. Should never be too bad.
 func writePatterns(w io.Writer, pttns []Pattern) error {
 	for pid, p := range pttns {
-		err := p.Write(w, pid)
+		err := p.Write(w, uint8(pid))
 		if err != nil {
 			return err
 		}

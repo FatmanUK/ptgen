@@ -2,10 +2,6 @@ package protracker
 
 import (
 	"bufio"
-	"fmt"
-	xlha "github.com/FatmanUK/fatgo/xlha"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -67,31 +63,4 @@ func PrepareRegexes() []*regexp.Regexp {
 	reHex := regexp.MustCompile(RGX_HEX_EVIDENCE)
 	rePttn := regexp.MustCompile(RGX_PTTN_FILE)
 	return []*regexp.Regexp{reRow, reHex, rePttn}
-}
-
-func extractSample(n string, lr *xlha.Reader,
-	data *[]byte) (bool, error) {
-	h, err := lr.Next()
-	if err == io.EOF {
-		return true, nil
-	}
-	if err != nil {
-		return true, fmt.Errorf(ERR_ARCH_HEADER_PARSE, err)
-	}
-	log.Println(fmt.Sprintf(MSG_ARCH_HEADER_PARSE_OK, h.Name,
-		h.Method, h.OriginalSize))
-	*data, err = io.ReadAll(lr)
-	if err != nil {
-		return true, fmt.Errorf(ERR_ARCH_EXTRACTION,
-			h.Name, err)
-	}
-	written := uint32(len(*data))
-	if written != h.OriginalSize {
-		return true, fmt.Errorf(ERR_ARCH_SIZE_MISMATCH,
-			h.Name, h.OriginalSize, written)
-	}
-	if n == h.Name { // found our file
-		return true, nil
-	}
-	return false, nil
 }

@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-//const FMT_TST_STR = `Exp: "%s" Got: "%s"`
-//const FMT_TST_NUM = `Exp:  %d  Got:  %d `
-//const FMT_TST_VAR = `Exp: "%v" Got: "%v"`
-
 const TST_OK_MOD_TITLE = `Title is ok.`
 const TST_NO_MOD_TITLE = `Title is wrong.`
 
@@ -50,6 +46,7 @@ func TestModProjectFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestModProjectFactory_Must_Fail(t *testing.T) {
+//91:func ModProjectFactory() ModProject {
 }
 
 func TestModInfoFactory_Must_Succeed(t *testing.T) {
@@ -88,25 +85,27 @@ func TestModInfoFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestModInfoFactory_Must_Fail(t *testing.T) {
+//102:func (p *ModProject) ModInfoFactory() ModInfo {
 }
 
 func TestOutputEverything_Must_Succeed(t *testing.T) {
-	//60:func (p *ModProject) OutputEverything(logs chan string) error {
+//113:func (p *ModProject) OutputEverything(logs chan string) error {
 }
 
 func TestOutputEverything_Must_Fail(t *testing.T) {
-	//60:func (p *ModProject) OutputEverything(logs chan string) error {
+//113:func (p *ModProject) OutputEverything(logs chan string) error {
 }
 
 func TestPopulatePatterns_Must_Succeed(t *testing.T) {
-	//91:func (p *ModProject) PopulatePatterns(logs chan string,
+//149:func (p *ModProject) PopulatePatterns(logs chan string,
 }
 
 func TestPopulatePatterns_Must_Fail(t *testing.T) {
-	//91:func (p *ModProject) PopulatePatterns(logs chan string,
+//149:func (p *ModProject) PopulatePatterns(logs chan string,
 }
 
 func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
+//173:func (p *ModProject) isTooManyPatterns() error {
 /*
 	var err error
 	n := uint8(MAX_PATTERNS - 1)
@@ -134,7 +133,7 @@ func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
 }
 
 func TestIsTooManyPatterns_Must_Fail(t *testing.T) {
-	//115:func (p *ModProject) isTooManyPatterns() error {
+//173:func (p *ModProject) isTooManyPatterns() error {
 }
 
 func TestIsOrderListValid_Must_Succeed(t *testing.T) {
@@ -147,55 +146,55 @@ func TestIsOrderListValid_Must_Succeed(t *testing.T) {
 }
 
 func TestIsOrderListValid_Must_Fail(t *testing.T) {
-	//122:func (p *ModProject) isOrderListValid() bool {
+//180:func (p *ModProject) isOrderListValid() bool {
 }
 
 func TestIsGetFirstPatternIndex_Must_Succeed(t *testing.T) {
-	//135:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
+//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
 }
 
 func TestIsGetFirstPatternIndex_Must_Fail(t *testing.T) {
-	//135:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
+//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
 }
 
 func TestIsInjectInitialTempo_Must_Succeed(t *testing.T) {
-	//150:func (p *ModProject) injectInitialTempo() error {
+//208:func (p *ModProject) injectInitialTempo() error {
 }
 
 func TestIsInjectInitialTempo_Must_Fail(t *testing.T) {
-	//150:func (p *ModProject) injectInitialTempo() error {
+//208:func (p *ModProject) injectInitialTempo() error {
 }
 
 func TestPreProcessInstruments_Must_Succeed(t *testing.T) {
-	//178:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
+//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 }
 
 func TestPreProcessInstruments_Must_Fail(t *testing.T) {
-	//178:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
+//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 }
 
 func TestWriteHeaders_Must_Succeed(t *testing.T) {
-	//211:func (p *ModProject) writeHeaders(
+//269:func (p *ModProject) writeHeaders(
 }
 
 func TestWriteHeaders_Must_Fail(t *testing.T) {
-	//211:func (p *ModProject) writeHeaders(
+//269:func (p *ModProject) writeHeaders(
 }
 
 func TestWriteMod_Must_Succeed(t *testing.T) {
-	//235:func (p *ModProject) WriteMod(w io.Writer) error {
+//293:func (p *ModProject) WriteMod(w io.Writer) error {
 }
 
 func TestWriteMod_Must_Fail(t *testing.T) {
-	//235:func (p *ModProject) WriteMod(w io.Writer) error {
+//293:func (p *ModProject) WriteMod(w io.Writer) error {
 }
 
 func TestReadMetadata_Must_Succeed(t *testing.T) {
-	// func readMetadata(proj *pt.ModProject, logs chan string, file *os.File) (*pt.ModProject, error)
+//313:func (p *ModProject) ReadMetadata(logs chan string,
 }
 
 func TestReadMetadata_Must_Fail(t *testing.T) {
-	// func readMetadata(proj *pt.ModProject, logs chan string, file *os.File) (*pt.ModProject, error)
+//313:func (p *ModProject) ReadMetadata(logs chan string,
 }
 
 func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
@@ -211,21 +210,21 @@ func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
 }
 
 func TestDefaultOrderlist_Must_Fail(t *testing.T) {
-	//280:func (p *ModProject) DefaultOrderlist() []uint8 {
+//338:func (p *ModProject) DefaultOrderlist() []uint8 {
 }
 
 func TestCalculateLength_Must_Succeed(t *testing.T) {
-	//288:func (p *ModProject) CalculateLength(logs chan string) {
+//346:func (p *ModProject) CalculateLength() {
 }
 
 func TestCalculateLength_Must_Fail(t *testing.T) {
-	//288:func (p *ModProject) CalculateLength(logs chan string) {
+//346:func (p *ModProject) CalculateLength() {
 }
 
 func TestPopulateMetadata_Must_Succeed(t *testing.T) {
-	//296:func (p *ModProject) PopulateMetadata(logs chan string,
+//353:func (p *ModProject) PopulateMetadata(logs chan string,
 }
 
 func TestPopulateMetadata_Must_Fail(t *testing.T) {
-	//296:func (p *ModProject) PopulateMetadata(logs chan string,
+//353:func (p *ModProject) PopulateMetadata(logs chan string,
 }

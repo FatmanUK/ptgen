@@ -82,6 +82,7 @@ func TestCellFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestCellFactory_Must_Fail(t *testing.T) {
+//47:func CellFactory() Cell {
 }
 
 func TestCellRegexFactory_Must_Succeed(t *testing.T) {
@@ -99,6 +100,7 @@ func TestCellRegexFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestCellRegexFactory_Must_Fail(t *testing.T) {
+//55:func CellRegexFactory() string {
 }
 
 func TestCellLoad_Must_Succeed(t *testing.T) {
@@ -136,6 +138,7 @@ func TestCellLoad_Must_Succeed(t *testing.T) {
 }
 
 func TestCellLoad_Must_Fail(t *testing.T) {
+//61:func (c *Cell) Load(s string) error {
 }
 
 func TestCellSave_Must_Succeed(t *testing.T) {
@@ -155,9 +158,10 @@ func TestCellSave_Must_Succeed(t *testing.T) {
 }
 
 func TestCellSave_Must_Fail(t *testing.T) {
+//86:func (c *Cell) Save() string {
 }
 
-func TestEncodeCell_Must_Succeed(t *testing.T) {
+func TestCellPack_Must_Succeed(t *testing.T) {
 	t.Parallel()
 	var tests []CellTestData
 	cellBlank := Cell{Note: "", Instr: 0, Effect: ""}
@@ -251,7 +255,7 @@ func TestEncodeCell_Must_Succeed(t *testing.T) {
 }
 
 // TestEncodeCell_Must_Fail ensures validation blocks spec-breaking input
-func TestEncodeCell_Must_Fail(t *testing.T) {
+func TestCellPack_Must_Fail(t *testing.T) {
 	t.Parallel()
 	var tests []CellTestError
 	cellTooLow := Cell{Note: "B-2"}
@@ -325,41 +329,33 @@ func TestEncodeCell_Must_Fail(t *testing.T) {
 }
 
 func TestCellGetPeriod_Must_Succeed(t *testing.T) {
-	//82:func (c *Cell) getPeriod() uint16 {
+//95:func (c *Cell) getPeriod() uint16 {
 }
 
 func TestCellGetPeriod_Must_Fail(t *testing.T) {
-	//82:func (c *Cell) getPeriod() uint16 {
+//95:func (c *Cell) getPeriod() uint16 {
 }
 
 func TestCellGetEffectCommand_Must_Succeed(t *testing.T) {
-	//92:func (c *Cell) getEffectCommand() (uint8, error) {
+//105:func (c *Cell) getEffectCommand() (uint8, error) {
 }
 
 func TestCellGetEffectCommand_Must_Fail(t *testing.T) {
-	//92:func (c *Cell) getEffectCommand() (uint8, error) {
+//105:func (c *Cell) getEffectCommand() (uint8, error) {
 }
 
 func TestCellGetEffectParameter_Must_Succeed(t *testing.T) {
-	//109:func (c *Cell) getEffectParameter() (uint8, error) {
+//123:func (c *Cell) getEffectParameter() (uint8, error) {
 }
 
 func TestCellGetEffectParameter_Must_Fail(t *testing.T) {
-	//109:func (c *Cell) getEffectParameter() (uint8, error) {
-}
-
-func TestCellPack_Must_Succeed(t *testing.T) {
-	//139:func (c *Cell) Pack() ([4]byte, error) {
-}
-
-func TestCellPack_Must_Fail(t *testing.T) {
-	//139:func (c *Cell) Pack() ([4]byte, error) {
+//123:func (c *Cell) getEffectParameter() (uint8, error) {
 }
 
 func TestCellWrite_Must_Succeed(t *testing.T) {
-	//163:func (c *Cell) Write(w io.Writer) error {
+//180:func (c *Cell) Write(w io.Writer) error {
 }
 
 func TestCellWrite_Must_Fail(t *testing.T) {
-	//163:func (c *Cell) Write(w io.Writer) error {
+//180:func (c *Cell) Write(w io.Writer) error {
 }

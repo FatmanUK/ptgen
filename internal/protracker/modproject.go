@@ -119,21 +119,26 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 	if len(p.Title) > 20 { // title less than 21 bytes
 		return fmt.Errorf(ERR_MOD_TITLE_LONG)
 	}
-	downloads, err := DecideSources(p.Instruments)
+	cache, err := utils.GetUserAppCacheDir("ptgen")
 	if err != nil {
 		return err
 	}
-	err = Download(downloads, logs)
-	if err != nil {
-		return err
+	for _, i := range p.Instruments {
+		arch := archiveMap[i.Source]
+		arch.File = filepath.Join(cache, arch.File)
+		err = download(arch, logs)
+		if err != nil {
+			return err
+		}
 	}
 	err = p.WriteMod(&buf)
 	if err != nil {
 		return err
 	}
+	// bufKb := buf.Len()/1024
+	errMsg := fmt.Sprintf(LOG_WRN_TOO_BIG_KB, MOD_TOO_BIG_KB)
 	if buf.Len() > MOD_TOO_BIG_BYTES {
-		//logs <- fmt.Sprintf(LOG_WRN_TOO_BIG_KB,
-		//	buf.Len()/1024, MOD_TOO_BIG_KB)
+		logs <- errMsg
 	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err
