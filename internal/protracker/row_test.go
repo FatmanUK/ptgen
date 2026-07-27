@@ -61,6 +61,11 @@ func TestRowFactory_Must_Succeed(t *testing.T) {
 	}
 }
 
+// TODO: Redo the compressed regex. Now even bigger! >:o
+/*
+([0-9A-Fa-f]{2}) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|]?
+*/
+
 // Only defining succeed as it's too simple for fail conditions.
 func TestRowRegexFactory_Must_Succeed(t *testing.T) {
 	// The regex is so big I've compressed it with zlib!

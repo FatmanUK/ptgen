@@ -8,10 +8,10 @@ import (
 	"github.com/FatmanUK/fatgo/utils"
 )
 
-const RGX_NOTE = `[A-G-][-#][3-5-]`
-const RGX_INST = `[0-9A-F-]{2}`
-const RGX_EFFT = `[0-9A-F-]{3}`
-const RGX_CELL = `%s %s %s|%s %s|\.\.\.|---|-`
+const RGX_NOTE = `[A-G-\.][-#\.][3-5-\.]`
+const RGX_INST = `[0-9A-F-\.]{2}`
+const RGX_EFFT = `[0-9A-F-\.]{3}`
+const RGX_CELL = `%s %s %s|%s %s|\.{3}|-{3}|-`
 
 const ERR_STR = `Actual value: "%s"`
 
