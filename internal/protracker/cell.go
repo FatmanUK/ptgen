@@ -34,6 +34,10 @@ var periodMap = map[string]uint16{
 	"G#5": 135, "A-5": 127, "A#5": 120, "B-5": 113,
 }
 
+func isEmpty(e string) bool {
+	return e == "" || e == "000" || e == "---" || e == "..."
+}
+
 // A Cell represents one channel on one row.
 // Note: e.g., "C-4" or "---" or ""
 // Instrument: 1-31 (0 means no instrument)
@@ -59,7 +63,7 @@ func CellRegexFactory() string {
 
 // Load: deserialise struct from a string
 func (c *Cell) Load(s string) error {
-	if s == "---" || s == "..." || s == "-" || s == "" {
+	if isEmpty(s) {
 		return nil
 	}
 	l := len(s)
@@ -94,7 +98,7 @@ func (c *Cell) Save() string {
 // Validate and map note to period
 func (c *Cell) getPeriod() uint16 {
 	var p uint16 = 0
-	if c.Note != "" && c.Note != "---" {
+	if !isEmpty(c.Note) {
 		p = periodMap[strings.ToUpper(c.Note)]
 	}
 	return p
@@ -105,7 +109,7 @@ func (c *Cell) getPeriod() uint16 {
 func (c *Cell) getEffectCommand() (uint8, error) {
 	var cmd uint8
 	var err error
-	if c.Effect != "" && c.Effect != "000" && c.Effect != "---" {
+	if !isEmpty(c.Effect) {
 		if len(c.Effect) != 3 {
 			msgPair := [2]string{ERR_CELL_EFFT, ERR_STR}
 			return 0, utils.Err(msgPair, c.Effect, nil)
@@ -123,7 +127,7 @@ func (c *Cell) getEffectCommand() (uint8, error) {
 func (c *Cell) getEffectParameter() (uint8, error) {
 	var param uint8
 	var err error
-	if c.Effect != "" && c.Effect != "000" && c.Effect != "---" {
+	if !isEmpty(c.Effect) {
 		if len(c.Effect) != 3 {
 			msgPair := [2]string{ERR_CELL_EFFT, ERR_STR}
 			return 0, utils.Err(msgPair, c.Effect, nil)
@@ -154,7 +158,7 @@ func (c *Cell) getEffectParameter() (uint8, error) {
 func (c *Cell) Pack() ([4]byte, error) {
 	var out [4]byte
 	period := c.getPeriod()
-	if period == 0 && c.Note != "" && c.Note != "---" {
+	if period == 0 && !isEmpty(c.Note) {
 		msgPair := [2]string{ERR_CELL_NOTE, ERR_STR}
 		return out, utils.Err(msgPair, c.Note, nil)
 	}

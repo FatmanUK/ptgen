@@ -56,7 +56,7 @@ func (p *Pattern) InjectCommands(cmmds []string) uint8 {
 	var cmdIdx uint8 = 0
 	for ch := 0; ch < 4 && cmdIdx < uint8(len(cmmds)); ch++ {
 		eff := strings.TrimSpace(rowZero[ch].Effect)
-		if eff == "" || eff == "000" || eff == "---" {
+		if isEmpty(eff) {
 			rowZero[ch].Effect = cmmds[cmdIdx]
 			cmdIdx++
 		}
