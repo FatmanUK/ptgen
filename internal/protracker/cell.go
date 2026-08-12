@@ -72,7 +72,7 @@ func (c *Cell) Load(s string) error {
 	}
 	if l >= 6 {
 		i := s[4:6]
-		if i != "--" {
+		if i != "--" && i != ".." {
 			u, err := strconv.ParseUint(i, 16, 16)
 			if err != nil {
 				return err
