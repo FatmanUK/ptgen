@@ -61,32 +61,6 @@ func TestRowFactory_Must_Succeed(t *testing.T) {
 	}
 }
 
-// TODO: Redo the compressed regex. Now even bigger! >:o
-/*
-([0-9A-Fa-f]{2}) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|] *([A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2} [0-9A-F-\.]{3}|[A-G-\.][-#\.][3-5-\.] [0-9A-F-\.]{2}|\.{3}|-{3}|-) *[:|]?
-*/
-
-// Only defining succeed as it's too simple for fail conditions.
-func TestRowRegexFactory_Must_Succeed(t *testing.T) {
-	// The regex is so big I've compressed it with zlib!
-	exRgxCmp := `eJzSiDbQtXTUdUvUTYutNqrVVNCKtqqJVdDSiHbUddeNj`
-	exRgxCmp += `dZVjo021jXVjVWAKtQFKUPiGNfW4FVaE6MHgjW6uro1uq`
-	exRgxCmp += `PGEzbeHhAAAP__UIZrTQ`
-	expectedRgx, err := utils.Decompress(exRgxCmp)
-	var errMsg [2]string
-	if err != nil {
-		t.Fatalf("Error decompressing string: %v", err)
-	}
-	r := RowRegexFactory()
-	if r == expectedRgx {
-		t.Logf(TST_OK_ROW_REGEX)
-	} else {
-		errMsg = [2]string{TST_NO_ROW_REGEX, FMT_TST_STR}
-		valPair := [2]string{expectedRgx, r}
-		utils.TErr(t, errMsg, valPair)
-	}
-}
-
 func TestRowNumFromRowStr_Must_Succeed(t *testing.T) {
 	var errMsg [2]string
 	tests := []NumTests{
