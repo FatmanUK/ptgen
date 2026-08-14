@@ -139,6 +139,10 @@ func (i *Instrument) temporaryWorkaroundWhileXlhaBroken(arch SampleArchive, data
 	return err
 }
 
+func (i *Instrument) matches(n string) bool {
+	return (strings.Replace(i.Name, "/", "\\", -1) == n)
+}
+
 func (i *Instrument) lhaLoop(lhaReader *xlha.Reader,
 		data *[]byte) (bool, error) {
 	h, err := lhaReader.Next()
@@ -149,6 +153,7 @@ func (i *Instrument) lhaLoop(lhaReader *xlha.Reader,
 		//return fmt.Errorf(ERR_ARCH_HEADER_PARSE, err)
 		return false, err
 	}
+	//log.Println("Looking for ", i.Name)
 	//log.Println(fmt.Sprintf(MSG_ARCH_HEADER_PARSE_OK, h.Name, h.Method, h.OriginalSize))
 	*data, err = io.ReadAll(lhaReader)
 	if err != nil {
@@ -160,7 +165,7 @@ func (i *Instrument) lhaLoop(lhaReader *xlha.Reader,
 		return false, fmt.Errorf(ERR_ARCH_SIZE_MISMATCH,
 			h.Name, h.OriginalSize, written)
 	}
-	if i.Name == h.Name { // found our file
+	if i.matches(h.Name) { // found our file
 		return true, nil
 	}
 	return false, nil
@@ -187,7 +192,7 @@ func (i *Instrument) ExtractSample() ([]byte, error) {
 		return data, err
 	}
 	arch.File = filepath.Join(cache, arch.File)
-	//*
+	/*
 	err = i.temporaryWorkaroundWhileXlhaBroken(arch, &data)
 	/*/
 	err = i.lhaFile(arch, &data)
