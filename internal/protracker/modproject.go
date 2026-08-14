@@ -182,10 +182,17 @@ func (p *ModProject) isOrderListValid() bool {
 	if l == 0 || l > MAX_PATTERNS {
 		return false
 	}
+	orderMax := uint8(0)
 	for _, j := range p.OrderList {
+		if j > orderMax {
+			orderMax = j
+		}
 		if int(j) >= len(p.Patterns) {
 			return false
 		}
+	}
+	if len(p.Patterns) != int(orderMax + 1) {
+		return false
 	}
 	return true
 }
