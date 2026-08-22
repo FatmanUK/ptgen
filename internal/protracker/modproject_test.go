@@ -45,10 +45,6 @@ func TestModProjectFactory_Must_Succeed(t *testing.T) {
 	}
 }
 
-func TestModProjectFactory_Must_Fail(t *testing.T) {
-//91:func ModProjectFactory() ModProject {
-}
-
 func TestModInfoFactory_Must_Succeed(t *testing.T) {
 	p := ModProjectFactory()
 	i := p.ModInfoFactory()
@@ -82,26 +78,6 @@ func TestModInfoFactory_Must_Succeed(t *testing.T) {
 		m := fmt.Sprintf("%s %s", TST_NO_MOD_PTTN, FMT_TST_NUM)
 		t.Errorf(m, 1, i.Patterns)
 	}
-}
-
-func TestModInfoFactory_Must_Fail(t *testing.T) {
-//102:func (p *ModProject) ModInfoFactory() ModInfo {
-}
-
-func TestOutputEverything_Must_Succeed(t *testing.T) {
-//113:func (p *ModProject) OutputEverything(logs chan string) error {
-}
-
-func TestOutputEverything_Must_Fail(t *testing.T) {
-//113:func (p *ModProject) OutputEverything(logs chan string) error {
-}
-
-func TestPopulatePatterns_Must_Succeed(t *testing.T) {
-//149:func (p *ModProject) PopulatePatterns(logs chan string,
-}
-
-func TestPopulatePatterns_Must_Fail(t *testing.T) {
-//149:func (p *ModProject) PopulatePatterns(logs chan string,
 }
 
 func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
@@ -173,30 +149,6 @@ func TestPreProcessInstruments_Must_Fail(t *testing.T) {
 //236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 }
 
-func TestWriteHeaders_Must_Succeed(t *testing.T) {
-//269:func (p *ModProject) writeHeaders(
-}
-
-func TestWriteHeaders_Must_Fail(t *testing.T) {
-//269:func (p *ModProject) writeHeaders(
-}
-
-func TestWriteMod_Must_Succeed(t *testing.T) {
-//293:func (p *ModProject) WriteMod(w io.Writer) error {
-}
-
-func TestWriteMod_Must_Fail(t *testing.T) {
-//293:func (p *ModProject) WriteMod(w io.Writer) error {
-}
-
-func TestReadMetadata_Must_Succeed(t *testing.T) {
-//313:func (p *ModProject) ReadMetadata(logs chan string,
-}
-
-func TestReadMetadata_Must_Fail(t *testing.T) {
-//313:func (p *ModProject) ReadMetadata(logs chan string,
-}
-
 func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
 	proj := ModProjectFactory()
 	pttn := PatternFactory()
@@ -219,12 +171,4 @@ func TestCalculateLength_Must_Succeed(t *testing.T) {
 
 func TestCalculateLength_Must_Fail(t *testing.T) {
 //346:func (p *ModProject) CalculateLength() {
-}
-
-func TestPopulateMetadata_Must_Succeed(t *testing.T) {
-//353:func (p *ModProject) PopulateMetadata(logs chan string,
-}
-
-func TestPopulateMetadata_Must_Fail(t *testing.T) {
-//353:func (p *ModProject) PopulateMetadata(logs chan string,
 }

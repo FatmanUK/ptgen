@@ -5,14 +5,6 @@ import (
 	"testing"
 )
 
-func TestPatternFactory_Must_Succeed(t *testing.T) {
-//17:func PatternFactory() Pattern {
-}
-
-func TestPatternFactory_Must_Fail(t *testing.T) {
-//17:func PatternFactory() Pattern {
-}
-
 func TestPatternEmplaceRow_Must_Succeed(t *testing.T) {
 	var err error
 	testRow := [4]string{
@@ -41,47 +33,10 @@ func TestPatternEmplaceRow_Must_Fail(t *testing.T) {
 //26:func (p *Pattern) EmplaceRow(r uint8, m [4]string) (Pattern, error) {
 }
 
-func TestPatternLoad_Must_Succeed(t *testing.T) {
-//39:func (p *Pattern) Load(logs chan string, fileName string,
-}
-
-func TestPatternLoad_Must_Fail(t *testing.T) {
-//39:func (p *Pattern) Load(logs chan string, fileName string,
-}
-
 func TestPatternInjectCommands_Must_Succeed(t *testing.T) {
 //54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
 }
 
 func TestPatternInjectCommands_Must_Fail(t *testing.T) {
 //54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
-}
-
-func TestPatternWrite_Must_Succeed(t *testing.T) {
-//67:func (p *Pattern) Write(w io.Writer, pid uint8) error {
-}
-
-func TestPatternWrite_Must_Fail(t *testing.T) {
-//67:func (p *Pattern) Write(w io.Writer, pid uint8) error {
-}
-
-func TestPatternRead_Must_Succeed(t *testing.T) {
-//83:func (p *Pattern) Read(file io.Reader, logs chan string,
-	/*
-	   func TestReadPattern(t *testing.T) {
-	   	// func readPattern(file io.Reader, logs chan string, isHexRows bool) (pt.Pattern, error)
-	   }
-	*/
-}
-
-func TestPatternRead_Must_Fail(t *testing.T) {
-//83:func (p *Pattern) Read(file io.Reader, logs chan string,
-}
-
-func TestPatternScanLoop_Must_Succeed(t *testing.T) {
-//98:func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint8, error) {
-}
-
-func TestPatternScanLoop_Must_Fail(t *testing.T) {
-//98:func (p *Pattern) ScanLoop(logs chan string, d ScanData) (uint8, error) {
 }

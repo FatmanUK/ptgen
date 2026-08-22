@@ -5,16 +5,6 @@ import (
 	"testing"
 )
 
-// Mostly written by Google Gemini Pro. Tweaked extensively by me.
-
-//20:func prepareCommands(s uint8, b uint8) ([]string, error) {
-//42:func writeTitle(w io.Writer, title string) error {
-//53:func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
-//68:func writeOrderList(w io.Writer, orderList []uint8) error {
-//84:func writeMagic(w io.Writer) error {
-//94:func writePatterns(w io.Writer, pttns []Pattern) error {
-//105:func writeSamples(w io.Writer, slots [31]Instrument) error {
-
 /*
 type ModProjectTestError struct {
 	name        string
@@ -153,18 +143,6 @@ func TestWriteMagic(t *testing.T) {
 	}
 }
 
-func TestParseNote(t *testing.T) {
-	//func parseNote(n string) (uint16, bool) {
-}
-
-func TestParseEffect(t *testing.T) {
-	//func parseEffect(e string) (uint8, uint8, error) {
-}
-
-func TestPrepareCommands(t *testing.T) {
-	//func prepareCommands(s uint8, b uint8) ([]string, error) {
-}
-
 func TestInjectCommands(t *testing.T) {
 	//func injectCommands(p *ModProject, i uint8, commands []string) uint8 {
 }
@@ -181,16 +159,8 @@ func TestInjectAndCheck(t *testing.T) {
 	//func injectAndCheck(proj *ModProject) error {
 }
 
-func TestIsSlotPopulated(t *testing.T) {
-	//func isSlotPopulated(slot *Instrument) bool {
-}
-
 func TestPreProcessInstruments(t *testing.T) {
 	//func preProcessInstruments(proj *ModProject) ([31]Instrument, error) {
-}
-
-func TestWriteHeaders(t *testing.T) {
-	//func writeHeaders(w io.Writer,
 }
 
 func TestExtractAndInjectSamples(t *testing.T) {
@@ -204,54 +174,6 @@ func TestPrepareCommands_Must_Succeed(t *testing.T) {
 
 func TestPrepareCommands_Must_Fail(t *testing.T) {
 	//14:func prepareCommands(s uint8, b uint8) ([]string, error) {
-}
-
-func TestWriteTitle_Must_Succeed(t *testing.T) {
-	//34:func writeTitle(w io.Writer, title string) error {
-}
-
-func TestWriteTitle_Must_Fail(t *testing.T) {
-	//34:func writeTitle(w io.Writer, title string) error {
-}
-
-func TestWriteSampleHeaders_Must_Succeed(t *testing.T) {
-	//45:func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
-}
-
-func TestWriteSampleHeaders_Must_Fail(t *testing.T) {
-	//45:func writeSampleHeaders(w io.Writer, slots [31]Instrument) error {
-}
-
-func TestWriteOrderList_Must_Succeed(t *testing.T) {
-	//60:func writeOrderList(w io.Writer, orderList []uint8) error {
-}
-
-func TestWriteOrderList_Must_Fail(t *testing.T) {
-	//60:func writeOrderList(w io.Writer, orderList []uint8) error {
-}
-
-func TestWriteMagic_Must_Succeed(t *testing.T) {
-	//76:func writeMagic(w io.Writer) error {
-}
-
-func TestWriteMagic_Must_Fail(t *testing.T) {
-	//76:func writeMagic(w io.Writer) error {
-}
-
-func TestWritePatterns_Must_Succeed(t *testing.T) {
-	//86:func writePatterns(w io.Writer, pttns []Pattern) error {
-}
-
-func TestWritePatterns_Must_Fail(t *testing.T) {
-	//86:func writePatterns(w io.Writer, pttns []Pattern) error {
-}
-
-func TestWriteSamples_Must_Succeed(t *testing.T) {
-	//97:func writeSamples(w io.Writer, slots [31]Instrument) error {
-}
-
-func TestWriteSamples_Must_Fail(t *testing.T) {
-	//97:func writeSamples(w io.Writer, slots [31]Instrument) error {
 }
 
 /*

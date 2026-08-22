@@ -351,11 +351,3 @@ func TestCellGetEffectParameter_Must_Succeed(t *testing.T) {
 func TestCellGetEffectParameter_Must_Fail(t *testing.T) {
 //123:func (c *Cell) getEffectParameter() (uint8, error) {
 }
-
-func TestCellWrite_Must_Succeed(t *testing.T) {
-//180:func (c *Cell) Write(w io.Writer) error {
-}
-
-func TestCellWrite_Must_Fail(t *testing.T) {
-//180:func (c *Cell) Write(w io.Writer) error {
-}
