@@ -45,8 +45,9 @@ const LOG_YAML_DETECTED = `YAML metadata detected.`
 const LOG_LOADING_METADATA = `Loading metadata and pattern order.`
 
 const FMT_PTTN_FILE = `pattern%02x.txt`
+const FMT_PTTN_MD = `pattern%02x.md`
 
-const RGX_PTTN_FILE = `^pattern[0-9A-Fa-f]{2}\.txt$`
+const RGX_PTTN_FILE = `^pattern[0-9A-Fa-f]{2}\.(?:txt|md)$`
 
 const ERR_MOD_INJECT = `Tempo injection error: %w`
 const ERR_MOD_ORDER_LIST = `Order list is wrong.`
@@ -146,6 +147,47 @@ func (p *ModProject) OutputEverything() error {
 	return err
 }
 
+func findFile(path string, i int) (string, error) {
+	fileName := fmt.Sprintf(FMT_PTTN_FILE, i)
+	fullPath := filepath.Join(path, fileName)
+	ex, err := utils.IsFileExists(fullPath, false)
+	if err != nil {
+		fmt.Println("File .txt found but error")
+		return fileName, err
+	}
+	if !ex {
+		fileName = fmt.Sprintf(FMT_PTTN_MD, i)
+		fullPath = filepath.Join(path, fileName)
+		ex, err = utils.IsFileExists(fullPath, false)
+		if err != nil {
+			fmt.Println("File .md found but error")
+			return fileName, err
+		}
+		if !ex {
+			m := fmt.Errorf("Pattern %d not found.", i)
+			return fileName, m
+		}
+	}
+	return fileName, nil
+}
+
+func (p *ModProject) loadPttns(path string, isHex bool) error {
+	for i := range p.Patterns {
+		// load txt or md file
+		fileName, err := findFile(path, i)
+		if err != nil {
+			return err
+		}
+		p.logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
+		fullPath := filepath.Join(path, fileName)
+		err = p.Patterns[i].Load(p.logs, fullPath, isHex)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // No monolithic pattern files. Too annoying.
 // Requires the patterns formatted in plain text.
 func (p *ModProject) PopulatePatterns(path string) error {
@@ -154,19 +196,16 @@ func (p *ModProject) PopulatePatterns(path string) error {
 	if err != nil {
 		return err
 	}
+	p.logs <- fmt.Sprintf("Found %d patterns.", numPttns)
 	hex, err := IsHexDetected(path)
 	if err != nil {
 		return err
 	}
+	p.logs <- fmt.Sprintf("Is hex rows: %v", hex)
 	p.Patterns = make([]Pattern, numPttns)
-	for i := range p.Patterns {
-		fileName := fmt.Sprintf(FMT_PTTN_FILE, i)
-		p.logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
-		fullPath := filepath.Join(path, fileName)
-		err = p.Patterns[i].Load(p.logs, fullPath, hex)
-		if err != nil {
-			return err
-		}
+	err = p.loadPttns(path, hex)
+	if err != nil {
+	       return err
 	}
 	return p.isTooManyPatterns()
 }

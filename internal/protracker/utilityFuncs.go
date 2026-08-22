@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-const RGX_HEX_EVIDENCE = `^[   ]*[\(\[]?[      ]*[0-3][A-Fa-f][        ]*[\)\]]?[      ]*[\|:].*$`
+const RGX_HEX_EVIDENCE = `^[ 	]*[\(\[]?[ 	]*[0-3][A-Fa-f][ 	]*[\)\]]?[ 	]*[\|:].*$`
 
 const ERR_ARCH_HEADER_PARSE = `failed header parse: %v`
 const MSG_ARCH_HEADER_PARSE_OK = `Processing file: %s (Method: %s, Original Size: %d)`
@@ -51,8 +51,7 @@ func CheckHex(filePath string, reRow *regexp.Regexp,
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		mRow := reHex.FindStringSubmatch(scanner.Text())
-		if len(mRow) > 1 {
+		if reHex.MatchString(scanner.Text()) {
 			return true, nil
 		}
 	}
