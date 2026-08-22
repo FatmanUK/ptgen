@@ -1,8 +1,8 @@
 package protracker
 
 import (
-	"testing"
 	"github.com/FatmanUK/fatgo/utils"
+	"testing"
 )
 
 const SAMPLE2_PTTN_COUNT = 4

@@ -30,13 +30,13 @@ func TestPatternEmplaceRow_Must_Succeed(t *testing.T) {
 }
 
 func TestPatternEmplaceRow_Must_Fail(t *testing.T) {
-//26:func (p *Pattern) EmplaceRow(r uint8, m [4]string) (Pattern, error) {
+	//26:func (p *Pattern) EmplaceRow(r uint8, m [4]string) (Pattern, error) {
 }
 
 func TestPatternInjectCommands_Must_Succeed(t *testing.T) {
-//54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
+	//54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
 }
 
 func TestPatternInjectCommands_Must_Fail(t *testing.T) {
-//54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
+	//54:func (p *Pattern) InjectCommands(cmmds []string) uint8 {
 }

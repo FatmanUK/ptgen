@@ -2,8 +2,8 @@ package protracker
 
 import (
 	"fmt"
-	"testing"
 	"github.com/FatmanUK/fatgo/utils"
+	"testing"
 )
 
 // Test data.
@@ -32,9 +32,9 @@ const TST_OK_ROW_WRITE_NO = `Write is wrong, but that's ok.`
 const TST_NO_ROW_WRITE_OK = `Write is ok, but that's wrong.`
 
 type NumTests struct {
-	number     string
-	isHex      bool
-	expected   uint8
+	number   string
+	isHex    bool
+	expected uint8
 }
 
 // Only defining succeed as it's too simple for fail conditions.
@@ -64,8 +64,8 @@ func TestRowFactory_Must_Succeed(t *testing.T) {
 func TestRowNumFromRowStr_Must_Succeed(t *testing.T) {
 	var errMsg [2]string
 	tests := []NumTests{
-		{"1e", true, 30}, // 1e = 30
-		{"20", true, 32}, // 20 = 32
+		{"1e", true, 30},  // 1e = 30
+		{"20", true, 32},  // 20 = 32
 		{"20", false, 20}, // 20 = 20
 	}
 	errMsg = [2]string{TST_NO_ROW_NUM, FMT_TST_NUM}
@@ -83,8 +83,8 @@ func TestRowNumFromRowStr_Must_Succeed(t *testing.T) {
 func TestRowNumFromRowStr_Must_Fail(t *testing.T) {
 	var errMsg [2]string
 	tests := []NumTests{
-		{"1e", true, 31}, // 1e = 30
-		{"20", true, 31}, // 20 = 32
+		{"1e", true, 31},  // 1e = 30
+		{"20", true, 31},  // 20 = 32
 		{"2x", false, 20}, // 2x = nonsense
 	}
 	errMsg = [2]string{TST_NO_ROW_NUM_OK, FMT_TST_NUM}

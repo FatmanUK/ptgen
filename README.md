@@ -2,15 +2,16 @@
 
 [![Test-Build-Push](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml)
 
-I wanted to "compile" my `.mod` file from plain text, so it could be almost entirely versioned by git. I have a plan to implement samples and instruments.
+I wanted to "compile" my `.mod` file from plain text, so it could be entirely versioned by git. Samples don't quite fit in, but they are pulled from known online archives and we can version-control the metadata.
 
-`.mod` trackers (eg. MilkyTracker) are great, but they tend to use old-school DOS interfaces, and as such lack copy-n-paste. Entering notes (patterns) by hand in Milky is fun, but after a while it wears a bit. I'd rather enter the data in a modern text editor using a specific sparse format.
+`.mod` trackers (eg. MilkyTracker) are great, but they tend to use old-school DOS interfaces, and as such lack copy-n-paste. Entering notes (patterns) by hand in Milky is fun, but after a while it wears a bit. I'd rather enter the data in a modern text editor using a specific sparse format. Also, it's harder to meaningfully version-control a binary file than text source.
 
 To be clear, by `.mod` file I mean an old-school 90s musical composition format. They were mainly used by Amiga games. A `.mod` file had to be incredibly small and sparse --- several of them had to fit comfortably alongside a full game in just 880 *kilobytes* of disk space. Producing catchy tunes under these conditions required all the skills of the compositional geniuses of the day.
 
 See works in progress:
-  - https://github.com/FatmanUK/mod_cold_boot
   - https://github.com/FatmanUK/mod_signal_lost
+  - https://github.com/FatmanUK/mod_cold_boot
+  - https://github.com/FatmanUK/mod_shadow_circuit
 
 ## Lint/Test
    
@@ -41,7 +42,7 @@ Note the `.mod` data is output directly to stdout, so you must redirect it. I di
 
 ## Samples
 
-I'm currently using samples from ST-01. They're tiny *and* sound good. Besides, they're (likely?) unencumbered by copyright, unlike the rest of the ST-XX sample archive.
+I'm currently using samples from ST-01 and ST-02. They're tiny *and* sound good. Besides, they're (likely?) unencumbered by copyright, unlike the rest of the ST-XX sample archive.
 
 To get the ST-01 archive on Debian-based Linux, issue these commands:
    

@@ -2,10 +2,10 @@ package protracker
 
 import (
 	"fmt"
+	"github.com/FatmanUK/fatgo/utils"
 	"io"
 	"strconv"
 	"strings"
-	"github.com/FatmanUK/fatgo/utils"
 )
 
 const RGX_NOTE = `[A-G-\.][-#\.][3-5-\.]`

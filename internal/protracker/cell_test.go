@@ -2,9 +2,9 @@ package protracker
 
 import (
 	"fmt"
+	"github.com/FatmanUK/fatgo/utils"
 	"strings"
 	"testing"
-	"github.com/FatmanUK/fatgo/utils"
 )
 
 type CellTestData struct {
@@ -82,7 +82,7 @@ func TestCellFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestCellFactory_Must_Fail(t *testing.T) {
-//47:func CellFactory() Cell {
+	//47:func CellFactory() Cell {
 }
 
 func TestCellRegexFactory_Must_Succeed(t *testing.T) {
@@ -100,7 +100,7 @@ func TestCellRegexFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestCellRegexFactory_Must_Fail(t *testing.T) {
-//55:func CellRegexFactory() string {
+	//55:func CellRegexFactory() string {
 }
 
 func TestCellLoad_Must_Succeed(t *testing.T) {
@@ -138,7 +138,7 @@ func TestCellLoad_Must_Succeed(t *testing.T) {
 }
 
 func TestCellLoad_Must_Fail(t *testing.T) {
-//61:func (c *Cell) Load(s string) error {
+	//61:func (c *Cell) Load(s string) error {
 }
 
 func TestCellSave_Must_Succeed(t *testing.T) {
@@ -158,7 +158,7 @@ func TestCellSave_Must_Succeed(t *testing.T) {
 }
 
 func TestCellSave_Must_Fail(t *testing.T) {
-//86:func (c *Cell) Save() string {
+	//86:func (c *Cell) Save() string {
 }
 
 func TestCellPack_Must_Succeed(t *testing.T) {
@@ -329,25 +329,25 @@ func TestCellPack_Must_Fail(t *testing.T) {
 }
 
 func TestCellGetPeriod_Must_Succeed(t *testing.T) {
-//95:func (c *Cell) getPeriod() uint16 {
+	//95:func (c *Cell) getPeriod() uint16 {
 }
 
 func TestCellGetPeriod_Must_Fail(t *testing.T) {
-//95:func (c *Cell) getPeriod() uint16 {
+	//95:func (c *Cell) getPeriod() uint16 {
 }
 
 func TestCellGetEffectCommand_Must_Succeed(t *testing.T) {
-//105:func (c *Cell) getEffectCommand() (uint8, error) {
+	//105:func (c *Cell) getEffectCommand() (uint8, error) {
 }
 
 func TestCellGetEffectCommand_Must_Fail(t *testing.T) {
-//105:func (c *Cell) getEffectCommand() (uint8, error) {
+	//105:func (c *Cell) getEffectCommand() (uint8, error) {
 }
 
 func TestCellGetEffectParameter_Must_Succeed(t *testing.T) {
-//123:func (c *Cell) getEffectParameter() (uint8, error) {
+	//123:func (c *Cell) getEffectParameter() (uint8, error) {
 }
 
 func TestCellGetEffectParameter_Must_Fail(t *testing.T) {
-//123:func (c *Cell) getEffectParameter() (uint8, error) {
+	//123:func (c *Cell) getEffectParameter() (uint8, error) {
 }

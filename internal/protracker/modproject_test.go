@@ -81,35 +81,35 @@ func TestModInfoFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestIsTooManyPatterns_Must_Succeed(t *testing.T) {
-//173:func (p *ModProject) isTooManyPatterns() error {
-/*
-	var err error
-	n := uint8(MAX_PATTERNS - 1)
-	err = p.isTooManyPatterns(n)
-	if err == nil {
-		t.Logf(MSG_PTTN_NUM_OK, n)
-	} else {
-		t.Errorf(ERR_PTTN_NUM, n)
-	}
-	n = uint8(MAX_PATTERNS)
-	err = p.isTooManyPatterns(n)
-	if err == nil {
-		t.Logf(MSG_PTTN_NUM_OK, n)
-	} else {
-		t.Errorf(ERR_PTTN_NUM, n)
-	}
-	n = uint8(MAX_PATTERNS + 1)
-	err = p.isTooManyPatterns(n)
-	if err != nil {
-		t.Logf(MSG_PTTN_NUM_NOK, n)
-	} else {
-		t.Errorf(NERR_PTTN_NUM, n)
-	}
-*/
+	//173:func (p *ModProject) isTooManyPatterns() error {
+	/*
+		var err error
+		n := uint8(MAX_PATTERNS - 1)
+		err = p.isTooManyPatterns(n)
+		if err == nil {
+			t.Logf(MSG_PTTN_NUM_OK, n)
+		} else {
+			t.Errorf(ERR_PTTN_NUM, n)
+		}
+		n = uint8(MAX_PATTERNS)
+		err = p.isTooManyPatterns(n)
+		if err == nil {
+			t.Logf(MSG_PTTN_NUM_OK, n)
+		} else {
+			t.Errorf(ERR_PTTN_NUM, n)
+		}
+		n = uint8(MAX_PATTERNS + 1)
+		err = p.isTooManyPatterns(n)
+		if err != nil {
+			t.Logf(MSG_PTTN_NUM_NOK, n)
+		} else {
+			t.Errorf(NERR_PTTN_NUM, n)
+		}
+	*/
 }
 
 func TestIsTooManyPatterns_Must_Fail(t *testing.T) {
-//173:func (p *ModProject) isTooManyPatterns() error {
+	//173:func (p *ModProject) isTooManyPatterns() error {
 }
 
 func TestIsOrderListValid_Must_Succeed(t *testing.T) {
@@ -122,31 +122,31 @@ func TestIsOrderListValid_Must_Succeed(t *testing.T) {
 }
 
 func TestIsOrderListValid_Must_Fail(t *testing.T) {
-//180:func (p *ModProject) isOrderListValid() bool {
+	//180:func (p *ModProject) isOrderListValid() bool {
 }
 
 func TestIsGetFirstPatternIndex_Must_Succeed(t *testing.T) {
-//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
+	//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
 }
 
 func TestIsGetFirstPatternIndex_Must_Fail(t *testing.T) {
-//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
+	//193:func (p *ModProject) getFirstPatternIndex() (uint8, error) {
 }
 
 func TestIsInjectInitialTempo_Must_Succeed(t *testing.T) {
-//208:func (p *ModProject) injectInitialTempo() error {
+	//208:func (p *ModProject) injectInitialTempo() error {
 }
 
 func TestIsInjectInitialTempo_Must_Fail(t *testing.T) {
-//208:func (p *ModProject) injectInitialTempo() error {
+	//208:func (p *ModProject) injectInitialTempo() error {
 }
 
 func TestPreProcessInstruments_Must_Succeed(t *testing.T) {
-//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
+	//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 }
 
 func TestPreProcessInstruments_Must_Fail(t *testing.T) {
-//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
+	//236:func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 }
 
 func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
@@ -162,13 +162,13 @@ func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
 }
 
 func TestDefaultOrderlist_Must_Fail(t *testing.T) {
-//338:func (p *ModProject) DefaultOrderlist() []uint8 {
+	//338:func (p *ModProject) DefaultOrderlist() []uint8 {
 }
 
 func TestCalculateLength_Must_Succeed(t *testing.T) {
-//346:func (p *ModProject) CalculateLength() {
+	//346:func (p *ModProject) CalculateLength() {
 }
 
 func TestCalculateLength_Must_Fail(t *testing.T) {
-//346:func (p *ModProject) CalculateLength() {
+	//346:func (p *ModProject) CalculateLength() {
 }

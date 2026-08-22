@@ -5,11 +5,11 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
+	"github.com/FatmanUK/fatgo/utils"
 	"io"
 	"net/http"
 	"os"
 	"time"
-	"github.com/FatmanUK/fatgo/utils"
 )
 
 const SAFETY_PAUSE_S = 2
@@ -38,7 +38,7 @@ func (re *SHA256Sum) IsChecksumMatch(blob []byte) (bool, error) {
 	calcSum := sha256.Sum256(blob)
 	expected, err := hex.DecodeString(string(re.BytesHex))
 	if err != nil {
-//		return false, fmt.Errorf(ERR_DL_HEX_INVALID, err)
+		//		return false, fmt.Errorf(ERR_DL_HEX_INVALID, err)
 		return false, fmt.Errorf(ERR_DL_HEX_INVALID)
 	}
 	if subtle.ConstantTimeCompare(calcSum[:], expected) == 1 {
@@ -48,9 +48,9 @@ func (re *SHA256Sum) IsChecksumMatch(blob []byte) (bool, error) {
 }
 
 type SampleArchive struct {
-	Url string
+	Url      string
 	Checksum SHA256Sum
-	File string
+	File     string
 }
 
 func (re *SampleArchive) BlobFromURI(logs chan string) error {
@@ -102,7 +102,7 @@ func download(arch SampleArchive, logs chan string) error {
 }
 
 func (re *SampleArchive) Validate(r io.ReadCloser,
-		logs chan string) ([]byte, error) {
+	logs chan string) ([]byte, error) {
 	blob, err := io.ReadAll(r)
 	if err != nil {
 		return blob, err

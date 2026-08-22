@@ -21,7 +21,7 @@ func prepareCommands(s uint8, b uint8) ([]string, error) {
 	var commands []string
 	if s > 0 {
 		if s >= 32 {
-//			err := fmt.Errorf(ERR_CELL_EFFT_SPEED, s)
+			//			err := fmt.Errorf(ERR_CELL_EFFT_SPEED, s)
 			err := fmt.Errorf(ERR_CELL_EFFT_SPEED)
 			return commands, err
 		}
@@ -29,7 +29,7 @@ func prepareCommands(s uint8, b uint8) ([]string, error) {
 	}
 	if b > 0 {
 		if b < 32 {
-//			err := fmt.Errorf(ERR_CELL_EFFT_BPM, b)
+			//			err := fmt.Errorf(ERR_CELL_EFFT_BPM, b)
 			err := fmt.Errorf(ERR_CELL_EFFT_BPM)
 			return commands, err
 		}

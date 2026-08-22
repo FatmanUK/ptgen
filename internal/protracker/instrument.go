@@ -3,13 +3,13 @@ package protracker
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/FatmanUK/fatgo/utils"
+	"github.com/FatmanUK/fatgo/xlha"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"github.com/FatmanUK/fatgo/utils"
-	"github.com/FatmanUK/fatgo/xlha"
 )
 
 const TMP_WRKRND_CMDLINE = `/usr/bin/lha evifw=%s %s %s`
@@ -144,7 +144,7 @@ func (i *Instrument) matches(n string) bool {
 }
 
 func (i *Instrument) lhaLoop(lhaReader *xlha.Reader,
-		data *[]byte) (bool, error) {
+	data *[]byte) (bool, error) {
 	h, err := lhaReader.Next()
 	if err == io.EOF {
 		return true, err
@@ -193,8 +193,8 @@ func (i *Instrument) ExtractSample() ([]byte, error) {
 	}
 	arch.File = filepath.Join(cache, arch.File)
 	/*
-	err = i.temporaryWorkaroundWhileXlhaBroken(arch, &data)
-	/*/
+		err = i.temporaryWorkaroundWhileXlhaBroken(arch, &data)
+		/*/
 	err = i.lhaFile(arch, &data)
 	//*/
 	return data, err

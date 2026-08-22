@@ -81,7 +81,7 @@ type ScanData struct {
 }
 
 func (p *Pattern) Read(file io.Reader, logs chan string,
-		isHexRows bool) error {
+	isHexRows bool) error {
 	data := ScanData{
 		scanner:   bufio.NewScanner(file),
 		regex:     regexp.MustCompile(RowRegexFactory()),

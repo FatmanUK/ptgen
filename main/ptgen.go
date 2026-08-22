@@ -1,12 +1,12 @@
 package main
 
 import (
-	doh "github.com/FatmanUK/fatgo/docopt_helpers"
 	"fmt"
+	doh "github.com/FatmanUK/fatgo/docopt_helpers"
+	"github.com/FatmanUK/fatgo/utils"
 	"log"
 	pt "ptgen/internal/protracker"
 	"strings"
-	"github.com/FatmanUK/fatgo/utils"
 )
 
 const docoptFmt = `{{ .Name }} {{ .Version }}

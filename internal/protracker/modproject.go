@@ -205,7 +205,7 @@ func (p *ModProject) PopulatePatterns(path string) error {
 	p.Patterns = make([]Pattern, numPttns)
 	err = p.loadPttns(path, hex)
 	if err != nil {
-	       return err
+		return err
 	}
 	return p.isTooManyPatterns()
 }
@@ -231,7 +231,7 @@ func (p *ModProject) isOrderListValid() bool {
 			return false
 		}
 	}
-	if len(p.Patterns) != int(orderMax + 1) {
+	if len(p.Patterns) != int(orderMax+1) {
 		return false
 	}
 	return true
