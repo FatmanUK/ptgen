@@ -86,9 +86,10 @@ type ModProject struct {
 	OrderList   []uint8      `json:"orderList" yaml:"orderList"`
 	Patterns    []Pattern    `json:"patterns"`
 	Instruments []Instrument `json:"instruments"`
+	logs        chan string
 }
 
-func ModProjectFactory() ModProject {
+func ModProjectFactory(logs chan string) ModProject {
 	return ModProject{
 		Title:       DEFAULT_TITLE,
 		Speed:       DEFAULT_SPEED,
@@ -96,6 +97,7 @@ func ModProjectFactory() ModProject {
 		OrderList:   []uint8{0},
 		Patterns:    []Pattern{PatternFactory()},
 		Instruments: []Instrument{},
+		logs:        logs,
 	}
 }
 
@@ -110,12 +112,12 @@ func (p *ModProject) ModInfoFactory() ModInfo {
 	}
 }
 
-func (p *ModProject) OutputEverything(logs chan string) error {
+func (p *ModProject) OutputEverything() error {
 	var buf bytes.Buffer
 	var err error
 	info := p.ModInfoFactory()
 	output := utils.MustPrepTemplate("output", MetadataFmt, info)
-	logs <- string(output)
+	p.logs <- string(output)
 	if len(p.Title) > 20 { // title less than 21 bytes
 		return fmt.Errorf(ERR_MOD_TITLE_LONG)
 	}
@@ -126,7 +128,7 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 	for _, i := range p.Instruments {
 		arch := archiveMap[i.Source]
 		arch.File = filepath.Join(cache, arch.File)
-		err = download(arch, logs)
+		err = download(arch, p.logs)
 		if err != nil {
 			return err
 		}
@@ -138,7 +140,7 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 	// bufKb := buf.Len()/1024
 	errMsg := fmt.Sprintf(LOG_WRN_TOO_BIG_KB, MOD_TOO_BIG_KB)
 	if buf.Len() > MOD_TOO_BIG_BYTES {
-		logs <- errMsg
+		p.logs <- errMsg
 	}
 	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 	return err
@@ -146,9 +148,8 @@ func (p *ModProject) OutputEverything(logs chan string) error {
 
 // No monolithic pattern files. Too annoying.
 // Requires the patterns formatted in plain text.
-func (p *ModProject) PopulatePatterns(logs chan string,
-	path string) error {
-	logs <- LOG_LOADING_PTTNS
+func (p *ModProject) PopulatePatterns(path string) error {
+	p.logs <- LOG_LOADING_PTTNS
 	numPttns, err := utils.CountMatchingFiles(path, RGX_PTTN_FILE)
 	if err != nil {
 		return err
@@ -160,9 +161,9 @@ func (p *ModProject) PopulatePatterns(logs chan string,
 	p.Patterns = make([]Pattern, numPttns)
 	for i := range p.Patterns {
 		fileName := fmt.Sprintf(FMT_PTTN_FILE, i)
-		logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
+		p.logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
 		fullPath := filepath.Join(path, fileName)
-		err = p.Patterns[i].Load(logs, fullPath, hex)
+		err = p.Patterns[i].Load(p.logs, fullPath, hex)
 		if err != nil {
 			return err
 		}
@@ -317,8 +318,7 @@ func (p *ModProject) WriteMod(w io.Writer) error {
 	return writeSamples(w, slots)
 }
 
-func (p *ModProject) ReadMetadata(logs chan string,
-	file *os.File) error {
+func (p *ModProject) ReadMetadata(file *os.File) error {
 	var err error
 	content, err := io.ReadAll(file)
 	if err != nil {
@@ -329,13 +329,13 @@ func (p *ModProject) ReadMetadata(logs chan string,
 		return err
 	}
 	if json.Valid(content) {
-		logs <- LOG_JSON_DETECTED
+		p.logs <- LOG_JSON_DETECTED
 		err = json.NewDecoder(file).Decode(p)
 	} else {
 		var node yaml.Node
 		err = yaml.Unmarshal(content, &node)
 		if err == nil {
-			logs <- LOG_YAML_DETECTED
+			p.logs <- LOG_YAML_DETECTED
 			err = yaml.NewDecoder(file).Decode(p)
 		}
 	}
@@ -357,18 +357,17 @@ func (p *ModProject) CalculateLength() {
 }
 
 // The song metadata in JSON or YAML format, including order list.
-func (p *ModProject) PopulateMetadata(logs chan string,
-	fileName string) error {
+func (p *ModProject) PopulateMetadata(fileName string) error {
 	var err error
 	p.OrderList = p.DefaultOrderlist()
 	if fileName != "<nil>" {
-		logs <- LOG_LOADING_METADATA
+		p.logs <- LOG_LOADING_METADATA
 		file, err := os.Open(fileName)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
-		err = p.ReadMetadata(logs, file)
+		err = p.ReadMetadata(file)
 		if err != nil {
 			return err
 		}

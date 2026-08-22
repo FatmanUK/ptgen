@@ -24,7 +24,7 @@ const TST_OK_MOD_OLST = `OrderList is ok.`
 const TST_NO_MOD_OLST = `OrderList is wrong.`
 
 func TestModProjectFactory_Must_Succeed(t *testing.T) {
-	p := ModProjectFactory()
+	p := ModProjectFactory(make(chan string))
 	if p.Title == DEFAULT_TITLE {
 		t.Logf(TST_OK_MOD_TITLE)
 	} else {
@@ -46,7 +46,7 @@ func TestModProjectFactory_Must_Succeed(t *testing.T) {
 }
 
 func TestModInfoFactory_Must_Succeed(t *testing.T) {
-	p := ModProjectFactory()
+	p := ModProjectFactory(make(chan string))
 	i := p.ModInfoFactory()
 	if i.Title == DEFAULT_TITLE {
 		t.Logf(TST_OK_MOD_TITLE)
@@ -113,7 +113,7 @@ func TestIsTooManyPatterns_Must_Fail(t *testing.T) {
 }
 
 func TestIsOrderListValid_Must_Succeed(t *testing.T) {
-	p := ModProjectFactory()
+	p := ModProjectFactory(make(chan string))
 	if p.isOrderListValid() {
 		t.Logf(TST_OK_MOD_OLST)
 	} else {
@@ -150,7 +150,7 @@ func TestPreProcessInstruments_Must_Fail(t *testing.T) {
 }
 
 func TestDefaultOrderlist_Must_Succeed(t *testing.T) {
-	proj := ModProjectFactory()
+	proj := ModProjectFactory(make(chan string))
 	pttn := PatternFactory()
 	proj.Patterns = []Pattern{pttn, pttn, pttn, pttn, pttn}
 	proj.OrderList = proj.DefaultOrderlist()

@@ -54,14 +54,14 @@ func panicIfNotNil(err error) {
 
 func threadGenerate(logs chan string, metaFile any, patternPath any) {
 	defer close(logs)
-	proj := pt.ModProjectFactory()
+	proj := pt.ModProjectFactory(logs)
 	p := utils.StringFromAny(patternPath)
-	err := proj.PopulatePatterns(logs, p)
+	err := proj.PopulatePatterns(p)
 	panicIfNotNil(err)
 	m := utils.StringFromAny(metaFile)
-	err = proj.PopulateMetadata(logs, m)
+	err = proj.PopulateMetadata(m)
 	panicIfNotNil(err)
-	err = proj.OutputEverything(logs)
+	err = proj.OutputEverything()
 	panicIfNotNil(err)
 }
 
