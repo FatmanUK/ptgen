@@ -1,8 +1,8 @@
 package protracker
 
 import (
-	"fmt"
 	"testing"
+	"github.com/FatmanUK/fatgo/utils"
 )
 
 const SAMPLE2_PTTN_COUNT = 4
@@ -19,14 +19,24 @@ const ERR_HEX_DETECTED = `Hex detected.`
 const MSG_MOD_PTTN_COUNT_OK = `Pattern count is ok.`
 const ERR_MOD_PTTN_COUNT = `Pattern count is wrong.`
 
+func TestWtfNames(t *testing.T) {
+	path := `../../test_data/sample2`
+	numPttns, err := utils.CountMatchingFiles(path, RGX_PTTN_FILE)
+	if err != nil {
+		t.Errorf(`%v`, err)
+	}
+	t.Logf("Found %d patterns.", numPttns)
+}
+
 func TestIsHexDetected_Must_Succeed(t *testing.T) {
 	isHex, err := IsHexDetected(SAMPLE2_PTTN_DIR)
 	if isHex && err == nil {
 		t.Log(MSG_HEX_DETECTED)
 	} else {
-		m := fmt.Sprintf("%s %s", ERR_HEX_NOT_DETECTED,
-			FMT_TST_VAR)
-		t.Errorf(m, err)
+		//m := fmt.Sprintf("%s %s", ERR_HEX_NOT_DETECTED,
+		//	FMT_TST_VAR)
+		//t.Errorf(m, err)
+		t.Errorf(ERR_HEX_NOT_DETECTED)
 	}
 }
 

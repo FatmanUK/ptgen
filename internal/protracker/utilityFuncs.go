@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-const RGX_HEX_EVIDENCE = `[A-Fa-f]`
+const RGX_HEX_EVIDENCE = `^[   ]*[\(\[]?[      ]*[0-3][A-Fa-f][        ]*[\)\]]?[      ]*[\|:].*$`
 
 const ERR_ARCH_HEADER_PARSE = `failed header parse: %v`
 const MSG_ARCH_HEADER_PARSE_OK = `Processing file: %s (Method: %s, Original Size: %d)`
@@ -17,6 +17,7 @@ const ERR_ARCH_SIZE_MISMATCH = `Size mismatch for %s: expected %d bytes, extract
 
 // Row notation must be consistent across pattern files, but I don't
 // see a way to enforce it.
+// Reading will break if both are present.
 func IsHexDetected(path string) (bool, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -50,8 +51,8 @@ func CheckHex(filePath string, reRow *regexp.Regexp,
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		mRow := reRow.FindStringSubmatch(scanner.Text())
-		if len(mRow) > 1 && reHex.MatchString(mRow[1]) {
+		mRow := reHex.FindStringSubmatch(scanner.Text())
+		if len(mRow) > 1 {
 			return true, nil
 		}
 	}
