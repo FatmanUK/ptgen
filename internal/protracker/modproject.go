@@ -10,10 +10,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const MetadataFmt = `Mod metadata:
 Song Title:      {{ .Title }}
+Message:         {{ .Msg }}
 Format:          ProTracker-compatible MOD
 Channels:        4
 Speed:           {{ .Speed }}
@@ -33,7 +35,7 @@ const DEFAULT_SPEED = 6
 const DEFAULT_BPM = 125
 
 // Warnings.
-const MOD_TOO_BIG_KB = 50
+const MOD_TOO_BIG_KB = 75
 const MOD_TOO_BIG_BYTES = (MOD_TOO_BIG_KB * 1024)
 
 const LOG_WRN_TOO_BIG = `Mod is unusually large (>%d bytes).`
@@ -67,6 +69,7 @@ const ERR_PTTN_ZERO_FULL = `Injection failed. Row 0 of first pattern %d has insu
 
 type ModInfo struct {
 	Title       string
+	Msg         string
 	Speed       uint8
 	BPM         uint8
 	OrderLen    uint8
@@ -82,6 +85,7 @@ type ModInfo struct {
 // Up to 31 instruments
 type ModProject struct {
 	Title       string       `json:"title"`
+	Msg         string       `json:"message" yaml:"message"`
 	Speed       uint8        `json:"speed"`
 	BPM         uint8        `json:"bpm"`
 	OrderList   []uint8      `json:"orderList" yaml:"orderList"`
@@ -93,6 +97,7 @@ type ModProject struct {
 func ModProjectFactory(logs chan string) ModProject {
 	return ModProject{
 		Title:       DEFAULT_TITLE,
+		Msg:         "",
 		Speed:       DEFAULT_SPEED,
 		BPM:         DEFAULT_BPM,
 		OrderList:   []uint8{0},
@@ -105,6 +110,7 @@ func ModProjectFactory(logs chan string) ModProject {
 func (p *ModProject) ModInfoFactory() ModInfo {
 	return ModInfo{
 		Title:       p.Title,
+		Msg:         p.Msg,
 		Speed:       p.Speed,
 		BPM:         p.BPM,
 		OrderLen:    uint8(len(p.OrderList)),
@@ -113,38 +119,44 @@ func (p *ModProject) ModInfoFactory() ModInfo {
 	}
 }
 
-func (p *ModProject) OutputEverything() error {
-	var buf bytes.Buffer
-	var err error
-	info := p.ModInfoFactory()
-	output := utils.MustPrepTemplate("output", MetadataFmt, info)
-	p.logs <- string(output)
-	if len(p.Title) > 20 { // title less than 21 bytes
-		return fmt.Errorf(ERR_MOD_TITLE_LONG)
-	}
+func (p *ModProject) outputInstruments() error {
 	cache, err := utils.GetUserAppCacheDir("ptgen")
 	if err != nil {
 		return err
 	}
 	for _, i := range p.Instruments {
 		arch := archiveMap[i.Source]
+		arch.SetLogs(p.logs)
 		arch.File = filepath.Join(cache, arch.File)
-		err = download(arch, p.logs)
+		err = arch.Download()
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (p *ModProject) OutputEverything() error {
+	var buf bytes.Buffer
+	info := p.ModInfoFactory()
+	output := utils.MustPrepTemplate("output", MetadataFmt, info)
+	p.logs <- string(output)
+	if len(p.Title) > 20 { // title less than 21 bytes
+		return fmt.Errorf(ERR_MOD_TITLE_LONG)
+	}
+	err := p.outputInstruments()
+	if err != nil {
+		return err
 	}
 	err = p.WriteMod(&buf)
 	if err != nil {
 		return err
 	}
-	// bufKb := buf.Len()/1024
 	errMsg := fmt.Sprintf(LOG_WRN_TOO_BIG_KB, MOD_TOO_BIG_KB)
 	if buf.Len() > MOD_TOO_BIG_BYTES {
 		p.logs <- errMsg
 	}
-	err = binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
-	return err
+	return binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 }
 
 func findFile(path string, i int) (string, error) {
@@ -171,7 +183,7 @@ func findFile(path string, i int) (string, error) {
 	return fileName, nil
 }
 
-func (p *ModProject) loadPttns(path string, isHex bool) error {
+func (p *ModProject) loadPatterns(path string, isHex bool) error {
 	for i := range p.Patterns {
 		// load txt or md file
 		fileName, err := findFile(path, i)
@@ -203,7 +215,7 @@ func (p *ModProject) PopulatePatterns(path string) error {
 	}
 	p.logs <- fmt.Sprintf("Is hex rows: %v", hex)
 	p.Patterns = make([]Pattern, numPttns)
-	err = p.loadPttns(path, hex)
+	err = p.loadPatterns(path, hex)
 	if err != nil {
 		return err
 	}
@@ -283,12 +295,19 @@ func (p *ModProject) injectInitialTempo() error {
 func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 	// TODO: hmm... do we need p.Instruments /and/ slots?
 	var slots [31]Instrument
+	p.logs <- fmt.Sprintf("Message: %s", p.Msg)
+	titleSz := 22
+	pads := strings.Repeat(" ", 31*titleSz)
 	for _, i := range p.Instruments {
-		d, err := i.ExtractSample()
+		d, err := i.ExtractSample(p.logs)
 		if len(d)%2 == 1 { // see comment above
 			d = append(d, 0x00)
 		}
 		i.Data = d
+		if p.Msg != "" {
+			offset := int(i.ID-1)*titleSz
+			i.Name = (p.Msg + pads)[offset:offset+titleSz]
+		}
 		if err != nil {
 			return slots, err
 		}
@@ -298,8 +317,7 @@ func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 			return slots, m
 		}
 		if slots[i.ID].ID > 0 {
-			m := fmt.Errorf(ERR_INST_DUPE,
-				i.ID)
+			m := fmt.Errorf(ERR_INST_DUPE, i.ID)
 			return slots, m
 		}
 		// TODO: test i.ID ranges here. One too high so -1?
@@ -358,7 +376,6 @@ func (p *ModProject) WriteMod(w io.Writer) error {
 }
 
 func (p *ModProject) ReadMetadata(file *os.File) error {
-	var err error
 	content, err := io.ReadAll(file)
 	if err != nil {
 		return err

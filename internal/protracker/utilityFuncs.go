@@ -13,7 +13,6 @@ const ERR_ARCH_HEADER_PARSE = `failed header parse: %v`
 const MSG_ARCH_HEADER_PARSE_OK = `Processing file: %s (Method: %s, Original Size: %d)`
 
 const ERR_ARCH_EXTRACTION = `Extraction failed for file %s: %v`
-const ERR_ARCH_SIZE_MISMATCH = `Size mismatch for %s: expected %d bytes, extracted %d`
 
 // Row notation must be consistent across pattern files, but I don't
 // see a way to enforce it.

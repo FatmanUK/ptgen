@@ -5,7 +5,7 @@ go 1.24.13
 require (
 	github.com/FatmanUK/fatgo/docopt_helpers v0.0.0-20260423230453-42bf935d2be0
 	github.com/FatmanUK/fatgo/utils v0.0.7
-	github.com/FatmanUK/fatgo/xlha v0.0.2
+	github.com/FatmanUK/fatgo/xlha v0.0.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
