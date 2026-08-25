@@ -1,9 +1,6 @@
 # Variables
 GO = go
-PODMAN = podman
-APP_BINARY = ptgen
-IMAGE_REPO = ghcr.io/fatmanuk
-IMAGE_NAME = $(IMAGE_REPO)/ptgen
+APP_BINARY = ptgen_relaxed
 V_TAG = $(shell git tag --list 'v*' | tail -n1)
 VERSION = $(if $(V_TAG),$(V_TAG),v0.0.0)
 
@@ -43,38 +40,3 @@ test:
 # Lint code
 lint:
 	$(GO) fmt ./...
-
-# Build the container image using podman
-podman-build: build
-	$(PODMAN) build \
-		--compress=true \
-		--layers=true \
-		--format=oci \
-		-t $(IMAGE_NAME):latest \
-		-t $(IMAGE_NAME):$(BUILD_DATE) \
-		-t $(IMAGE_NAME):$(BUILD_TIMESTAMP) \
-		-t $(IMAGE_NAME):$(VERSION) \
-		-t $(IMAGE_NAME):$(shell python3 -c "$(CKSUM_SCRIPT)") \
-		--build-arg APP_BINARY=$(APP_BINARY) \
-		--build-arg BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
-		--build-arg VERSION=$(VERSION) \
-		.
-
-# Run the container locally using podman
-podman-run: podman-build
-	$(PODMAN) run \
-		--rm -it \
-		$(IMAGE_NAME):latest
-
-# Push to the image repo
-podman-push: podman-build
-	$(PODMAN) push \
-		$(IMAGE_NAME):latest
-	$(PODMAN) push \
-		$(IMAGE_NAME):$(BUILD_DATE)
-	$(PODMAN) push \
-		$(IMAGE_NAME):$(BUILD_TIMESTAMP)
-	$(PODMAN) push \
-		$(IMAGE_NAME):$(VERSION)
-	$(PODMAN) push \
-		$(IMAGE_NAME):$(shell python3 -c "$(CKSUM_SCRIPT)")
