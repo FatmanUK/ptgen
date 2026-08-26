@@ -5,7 +5,7 @@ import (
 	doh "github.com/FatmanUK/fatgo/docopt_helpers"
 	"github.com/FatmanUK/fatgo/utils"
 	"log"
-	pt "ptgen/internal/protracker"
+	"ptgen/internal/protracker"
 	"strings"
 )
 
@@ -14,7 +14,7 @@ const docoptFmt = `{{ .Name }} {{ .Version }}
 Outputs the binary data directly to stdout, so redirect it to a file.
 
 Usage:
-  {{ .Name }} [-m <metadata>] -p <patterns>
+  {{ .Name }} -m <metadata> -p <patterns>
   {{ .Name }} -h | --help
   {{ .Name }} -v | --version
 
@@ -54,15 +54,13 @@ func panicIfNotNil(err error) {
 
 func threadGenerate(logs chan string, metaFile any, patternPath any) {
 	defer close(logs)
-	proj := pt.ModProjectFactory(logs)
-	p := utils.StringFromAny(patternPath)
-	err := proj.PopulatePatterns(p)
+	mod := protracker.ModFactory(logs)
+	mod, err := mod.Init(
+		utils.StringFromAny(metaFile),
+		utils.StringFromAny(patternPath),
+	)
 	panicIfNotNil(err)
-	m := utils.StringFromAny(metaFile)
-	err = proj.PopulateMetadata(m)
-	panicIfNotNil(err)
-	err = proj.OutputEverything()
-	panicIfNotNil(err)
+	panicIfNotNil(mod.Output())
 }
 
 func threadLog(logs chan string) {

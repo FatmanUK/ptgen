@@ -29,7 +29,7 @@ func IsHexDetected(path string) (bool, error) {
 			continue
 		}
 		filePath := filepath.Join(path, name)
-		detected, err := CheckHex(filePath, rgxs[0], rgxs[1])
+		detected, err := CheckHex(filePath, rgxs[1])
 		if err != nil {
 			return false, err
 		}
@@ -41,8 +41,7 @@ func IsHexDetected(path string) (bool, error) {
 }
 
 // TODO: row number '5x' or '6x' is an instant return false, nil.
-func CheckHex(filePath string, reRow *regexp.Regexp,
-	reHex *regexp.Regexp) (bool, error) {
+func CheckHex(filePath string, reHex *regexp.Regexp) (bool, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return false, err
@@ -58,8 +57,7 @@ func CheckHex(filePath string, reRow *regexp.Regexp,
 }
 
 func PrepareRegexes() []*regexp.Regexp {
-	reRow := regexp.MustCompile(RowRegexFactory())
 	reHex := regexp.MustCompile(RGX_HEX_EVIDENCE)
 	rePttn := regexp.MustCompile(RGX_PTTN_FILE)
-	return []*regexp.Regexp{reRow, reHex, rePttn}
+	return []*regexp.Regexp{nil, reHex, rePttn}
 }

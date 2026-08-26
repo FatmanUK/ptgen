@@ -16,11 +16,10 @@ import (
 const MetadataFmt = `Mod metadata:
 Song Title:      {{ .Title }}
 Message:         {{ .Msg }}
-Format:          ProTracker-compatible MOD
-Channels:        4
+Channels:        {{ .Channels }}
 Speed:           {{ .Speed }}
 BPM:             {{ .BPM }}
-Pattern length:  64 rows (Len. 0x40h)
+Pattern size:    {{ .PatternSize }} rows
 Unique patterns: {{ .Patterns }}
 Order length:    {{ .OrderLen }}
 Instruments:     {{ .Instruments }}`
@@ -33,6 +32,8 @@ const MAX_ORDER_LIST = MAX_PATTERNS
 const DEFAULT_TITLE = `A Song With No Name`
 const DEFAULT_SPEED = 6
 const DEFAULT_BPM = 125
+const DEFAULT_PATTERN_SIZE = 64
+const DEFAULT_CHANNELS = 4
 
 // Warnings.
 const MOD_TOO_BIG_KB = 75
@@ -59,8 +60,8 @@ const ERR_MOD_LIST_EMPTY = ERR_MOD_LIST + ` Must not be empty.`
 const ERR_MOD_LIST_OOB = ERR_MOD_LIST + ` Invalid pattern reference %d.`
 const ERR_MOD_LIST_OVERFLOW = ERR_MOD_LIST + ` Maximum 128 items.` // TODO: is this right? 128 is max patterns, also max orderlist?
 
-const ERR_INST_TOO_MANY = `a maximum of 31 instruments are supported`
-const ERR_INST_INVALID_ID = `instrument '%s' has invalid ID %d (must be 1-31)`
+//const ERR_INST_TOO_MANY = `a maximum of 31 instruments are supported`
+//const ERR_INST_INVALID_ID = `instrument '%s' has invalid ID %d (must be 1-31)`
 const ERR_INST_DUPE = `duplicate instrument ID %d detected`
 const ERR_INST_SLOT = `instrument slot %d error: %w`
 
@@ -70,6 +71,8 @@ const ERR_PTTN_ZERO_FULL = `Injection failed. Row 0 of first pattern %d has insu
 type ModInfo struct {
 	Title       string
 	Msg         string
+	PatternSize uint8
+	Channels    uint8
 	Speed       uint8
 	BPM         uint8
 	OrderLen    uint8
@@ -77,15 +80,11 @@ type ModInfo struct {
 	Instruments uint8
 }
 
-// TODO: enforce these limits.
-// ModProject represents your input structure.
-// Speed: Optional: 1-31 (0: default, always 6)
-// BPM: Optional: 32-255 (0: default, always 125)
-// Patterns: a slice of Patterns
-// Up to 31 instruments
 type ModProject struct {
 	Title       string       `json:"title"`
 	Msg         string       `json:"message" yaml:"message"`
+	PatternSize uint8        `yaml:"patternSize"`
+	Channels    uint8        `yaml:"channels"`
 	Speed       uint8        `json:"speed"`
 	BPM         uint8        `json:"bpm"`
 	OrderList   []uint8      `json:"orderList" yaml:"orderList"`
@@ -98,10 +97,12 @@ func ModProjectFactory(logs chan string) ModProject {
 	return ModProject{
 		Title:       DEFAULT_TITLE,
 		Msg:         "",
+		PatternSize: DEFAULT_PATTERN_SIZE,
+		Channels:    DEFAULT_CHANNELS,
 		Speed:       DEFAULT_SPEED,
 		BPM:         DEFAULT_BPM,
 		OrderList:   []uint8{0},
-		Patterns:    []Pattern{PatternFactory()},
+		Patterns:    []Pattern{},
 		Instruments: []Instrument{},
 		logs:        logs,
 	}
@@ -111,6 +112,8 @@ func (p *ModProject) ModInfoFactory() ModInfo {
 	return ModInfo{
 		Title:       p.Title,
 		Msg:         p.Msg,
+		PatternSize: p.PatternSize,
+		Channels:    p.Channels,
 		Speed:       p.Speed,
 		BPM:         p.BPM,
 		OrderLen:    uint8(len(p.OrderList)),
@@ -185,6 +188,7 @@ func findFile(path string, i int) (string, error) {
 
 func (p *ModProject) loadPatterns(path string, isHex bool) error {
 	for i := range p.Patterns {
+		p.Patterns[i] = PatternFactory(p.PatternSize, p.Channels, p.logs)
 		// load txt or md file
 		fileName, err := findFile(path, i)
 		if err != nil {
@@ -192,7 +196,7 @@ func (p *ModProject) loadPatterns(path string, isHex bool) error {
 		}
 		p.logs <- fmt.Sprintf(LOG_LOADING_FILE, fileName)
 		fullPath := filepath.Join(path, fileName)
-		err = p.Patterns[i].Load(p.logs, fullPath, isHex)
+		err = p.Patterns[i].Load(fullPath, isHex, p.Channels)
 		if err != nil {
 			return err
 		}
@@ -230,10 +234,11 @@ func (p *ModProject) isTooManyPatterns() error {
 }
 
 func (p *ModProject) isOrderListValid() bool {
-	l := len(p.OrderList)
-	if l == 0 || l > MAX_PATTERNS {
-		return false
-	}
+/*
+	//l := len(p.OrderList)
+	//if l == 0 || l > MAX_PATTERNS {
+	//	return false
+	//}
 	orderMax := uint8(0)
 	for _, j := range p.OrderList {
 		if j > orderMax {
@@ -246,6 +251,7 @@ func (p *ModProject) isOrderListValid() bool {
 	if len(p.Patterns) != int(orderMax+1) {
 		return false
 	}
+*/
 	return true
 }
 
@@ -311,11 +317,11 @@ func (p *ModProject) preProcessInstruments() ([31]Instrument, error) {
 		if err != nil {
 			return slots, err
 		}
-		if i.ID < 1 || i.ID > 31 {
-			m := fmt.Errorf(ERR_INST_INVALID_ID,
-				i.Name, i.ID)
-			return slots, m
-		}
+		//if i.ID < 1 || i.ID > 31 {
+		//	m := fmt.Errorf(ERR_INST_INVALID_ID,
+		//		i.Name, i.ID)
+		//	return slots, m
+		//}
 		if slots[i.ID].ID > 0 {
 			m := fmt.Errorf(ERR_INST_DUPE, i.ID)
 			return slots, m
@@ -337,16 +343,16 @@ func (p *ModProject) writeHeaders(
 	if err != nil {
 		return slots, err
 	}
-	err = p.injectInitialTempo()
-	if err != nil {
-		return slots, fmt.Errorf(ERR_MOD_INJECT, err)
-	}
-	if !p.isOrderListValid() {
-		return slots, fmt.Errorf(ERR_MOD_LIST)
-	}
-	if len(p.Instruments) > 31 {
-		return slots, fmt.Errorf(ERR_INST_TOO_MANY)
-	}
+	//err = p.injectInitialTempo()
+	//if err != nil {
+	//	return slots, fmt.Errorf(ERR_MOD_INJECT, err)
+	//}
+	//if !p.isOrderListValid() {
+	//	return slots, fmt.Errorf(ERR_MOD_LIST)
+	//}
+	//if len(p.Instruments) > 31 {
+	//	return slots, fmt.Errorf(ERR_INST_TOO_MANY)
+	//}
 	err = writeTitle(w, p.Title)
 	if err != nil {
 		return slots, err

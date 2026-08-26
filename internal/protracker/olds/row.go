@@ -4,39 +4,40 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 )
 
-// These can be changed, if you don't want PT compatibility.
-const ROWS_PER_PATTERN = 64
-const CHANNELS_PER_ROW = 4
-
 // Regexes.
-const RGX_ROW = `(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s *(%s) *%s?`
 const RGX_ROWNUM = `[0-9A-Fa-f]{2}`
-const RGX_CELL_SEPARATOR = `[:|]`
+const RGX_CELL_SEP = `[:|]`
 
 // Formatting patterns.
-const FMT_ROW_PRETTY = `(%02x) %s | %s | %s | %s |`
 const FMT_LOCATION = `Pattern %d, Row %d, Channel %d: %w`
 
-// A Row contains exactly CHANNELS_PER_ROW channels.
-type Row [CHANNELS_PER_ROW]Cell
+type Row struct {
+	Cells []Cell
+}
 
-func RowFactory() Row {
-	r := Row{}
-	for i := range r {
-		r[i] = CellFactory()
+func RowFactory(numChannels uint8) Row {
+	r := Row{
+		Cells: make([]Cell, numChannels),
+	}
+	for i := range r.Cells {
+		r.Cells[i] = CellFactory()
 	}
 	return r
 }
 
-func RowRegexFactory() string {
+func RowRegexFactory(numChannels uint8) string {
 	cellRgx := CellRegexFactory()
-	return fmt.Sprintf(RGX_ROW, RGX_ROWNUM, RGX_CELL_SEPARATOR,
-		cellRgx, RGX_CELL_SEPARATOR,
-		cellRgx, RGX_CELL_SEPARATOR,
-		cellRgx, RGX_CELL_SEPARATOR,
-		cellRgx, RGX_CELL_SEPARATOR)
+	var rv []string
+	rv[0] = fmt.Sprintf("(%s)", RGX_ROWNUM)
+	for ; numChannels > 0; numChannels-- {
+		rv = append(rv, fmt.Sprintf("*%s", RGX_CELL_SEP))
+		rv = append(rv, fmt.Sprintf("*(%s)", cellRgx))
+	}
+	rv = append(rv, fmt.Sprintf("*%s?", RGX_CELL_SEP))
+	return strings.Join(rv, " ")
 }
 
 func RowNumFromRowStr(rowStr string, isHex bool) (uint8, error) {
@@ -57,16 +58,18 @@ func RowNumFromRowStr(rowStr string, isHex bool) (uint8, error) {
 // to the Row's nature or function, so I don't include the identifier
 // *in* the Row type.
 // Save: serialise struct to a string
-func (r *Row) Save(idx uint8) string {
-	if idx > 63 {
-		return ""
+func (r *Row) Save(idx uint8, chans uint8) string {
+	rowArr := []string{}
+	rowArr = append(rowArr, fmt.Sprintf("(%02x)", idx))
+	for n := uint8(0); n < chans; n++ {
+		c := r.Cells[n].Save()
+		rowArr = append(rowArr, fmt.Sprintf(" %s |", c))
 	}
-	return fmt.Sprintf(FMT_ROW_PRETTY, idx, r[0].Save(),
-		r[1].Save(), r[2].Save(), r[3].Save())
+	return strings.Join(rowArr, " ")
 }
 
 func (r *Row) Write(w io.Writer, pi uint8, ri uint8) error {
-	for ci, cell := range *r {
+	for ci, cell := range r.Cells {
 		err := cell.Write(w)
 		if err != nil {
 			m := fmt.Errorf(FMT_LOCATION, pi, ri, ci, err)
