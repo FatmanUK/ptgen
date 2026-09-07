@@ -58,13 +58,13 @@ func ModFactory(l chan string) Mod {
 	}
 }
 
-func (m Mod) Init(metaFile string, patternPath string) (Mod, error) {
-	m, err := m.loadMetadata(metaFile)
+func (m Mod) Init(logs chan string, f string, p string) (Mod, error) {
+	m, err := ModFactory(logs).loadMetadata(f)
 	if err != nil {
 		return m, err
 	}
-	m.outputMetadata()
-	return m.enumeratePatterns(patternPath)
+	m.logs <- string(utils.MustPrepTemplate("out", mdFmt, m))
+	return m.enumeratePatterns(p)
 }
 
 func (m Mod) loadMetadata(metaFile string) (Mod, error) {
@@ -115,10 +115,6 @@ func (m Mod) validateMetadata() error {
 	return nil
 }
 
-func (m Mod) outputMetadata() {
-	m.logs <- string(utils.MustPrepTemplate("out", mdFmt, m))
-}
-
 func (m Mod) enumeratePatterns(patternPath string) (Mod, error) {
 	if patternPath != "<nil>" {
 		//m.logs <- LOG_LOADING_PTTNS
@@ -129,10 +125,14 @@ func (m Mod) enumeratePatterns(patternPath string) (Mod, error) {
 		}
 		m.logs <- fmt.Sprintf("Found %d patterns.", numPttns)
 		m.Patterns = make([]Pattern, numPttns)
-		for k, v := range m.Patterns {
-			v = PatternFactory(m.logs, m.RowsPerPattern,
-				m.ChannelsPerRow)
-			v, err = v.loadFile(patternPath, k)
+		for k := range m.Patterns {
+			m.Patterns[k], err = m.Patterns[k].Init(
+				m.logs,
+				m.RowsPerPattern,
+				m.ChannelsPerRow,
+				patternPath,
+				k,
+			)
 			if err != nil {
 				return m, err
 			}
@@ -152,7 +152,7 @@ func (m Mod) Output() error {
 		return err
 	}
 	var buf bytes.Buffer
-	if err = m.downloadInstruments(cache); err != nil {
+	if err = m.downloadArchives(cache); err != nil {
 		return err
 	}
 	if err = m.write(&buf); err != nil {
@@ -167,10 +167,10 @@ func (m Mod) Output() error {
 	return binary.Write(os.Stdout, binary.BigEndian, buf.Bytes())
 }
 
-func (m Mod) downloadInstruments(cache string) error {
+func (m Mod) downloadArchives(cache string) error {
 	for _, inst := range m.Instruments {
-		a := ArchiveFactory(inst, m.logs, cache)
-		if err := a.Download(); err != nil {
+		_, err := Archive{}.Init(m.logs, cache, inst)
+		if err != nil {
 			return err
 		}
 	}
@@ -179,6 +179,43 @@ func (m Mod) downloadInstruments(cache string) error {
 
 // calculate loop points on the fly
 func (m Mod) write(b *bytes.Buffer) error {
-	//
+/*
+	slots, err := p.preProcessInstruments()
+	if err != nil {
+		return slots, err
+	}
+	//err = p.injectInitialTempo()
+	//if err != nil {
+	//	return slots, fmt.Errorf(ERR_MOD_INJECT, err)
+	//}
+	//if !p.isOrderListValid() {
+	//	return slots, fmt.Errorf(ERR_MOD_LIST)
+	//}
+	//if len(p.Instruments) > 31 {
+	//	return slots, fmt.Errorf(ERR_INST_TOO_MANY)
+	//}
+	err = writeTitle(w, p.Title)
+	if err != nil {
+		return slots, err
+	}
+	err = writeSampleHeaders(w, slots)
+	if err != nil {
+		return err
+	}
+	err = writeOrderList(w, p.OrderList)
+	if err != nil {
+		return err
+	}
+	err = writeMagic(w)
+	if err != nil {
+		return err
+	}
+	err = writePatterns(w, p.Patterns)
+	if err != nil {
+		return err
+	}
+	return writeSamples(w, slots)
+
+*/
 	return nil
 }

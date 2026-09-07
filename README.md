@@ -1,6 +1,6 @@
 # ptgen
 
-[![Test-Build-Push](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/deploy.yml)
+[![Test](https://github.com/FatmanUK/ptgen/actions/workflows/test.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/test.yml) [![Build](https://github.com/FatmanUK/ptgen/actions/workflows/build.yml/badge.svg)](https://github.com/FatmanUK/ptgen/actions/workflows/build.yml)
 
 I wanted to "compile" my `.mod` file from plain text, so it could be entirely versioned by git. Samples don't quite fit in, but they are pulled from known online archives and we can version-control the metadata.
 

@@ -54,22 +54,13 @@ func panicIfNotNil(err error) {
 
 func threadGenerate(logs chan string, metaFile any, patternPath any) {
 	defer close(logs)
-	mod := protracker.ModFactory(logs)
-	mod, err := mod.Init(
+	mod, err := protracker.Mod{}.Init(
+		logs,
 		utils.StringFromAny(metaFile),
 		utils.StringFromAny(patternPath),
 	)
 	panicIfNotNil(err)
 	panicIfNotNil(mod.Output())
-}
-
-func threadLog(logs chan string) {
-	for msg := range logs {
-		msgs := strings.Split(msg, "\\n")
-		for _, m := range utils.RemoveEmptyStrings(msgs) {
-			log.Println(m)
-		}
-	}
 }
 
 func main() {
@@ -81,5 +72,10 @@ func main() {
 	panicIfNotNil(err)
 	logs := make(chan string)
 	go threadGenerate(logs, args["-m"], args["-p"])
-	threadLog(logs)
+	for msg := range logs {
+		msgs := strings.Split(msg, "\\n")
+		for _, m := range utils.RemoveEmptyStrings(msgs) {
+			log.Println(m)
+		}
+	}
 }

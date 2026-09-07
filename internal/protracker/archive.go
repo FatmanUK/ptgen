@@ -39,16 +39,22 @@ type Archive struct {
 	logs chan string
 }
 
-func ArchiveFactory(i Instrument, l chan string, p string) Archive {
+func ArchiveFactory(l chan string, p string, i Instrument) Archive {
 	// TODO: replace, look up archiveMap dynamically
+	data := archiveMap[i.Source]
 	return Archive{
-		Url: archiveMap[i.Source].Url,
-		Checksum: archiveMap[i.Source].Checksum,
-		File: filepath.Join(p, archiveMap[i.Source].File),
+		Url: data.Url,
+		Checksum: data.Checksum,
+		File: filepath.Join(p, data.File),
 		logs: l,
 	}
 }
 
-func (a Archive) Download() error {
-	return nil
+func (a Archive) Init(l chan string, p string,
+	i Instrument) (Archive, error) {
+	return ArchiveFactory(l, p, i).Download()
+}
+
+func (a Archive) Download() (Archive, error) {
+	return a, nil
 }

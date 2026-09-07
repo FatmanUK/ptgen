@@ -13,6 +13,11 @@ func PatternFactory(l chan string, r uint8, c uint8) Pattern {
 	}
 }
 
+func (p Pattern) Init(logs chan string, r uint8, c uint8, path string,
+	n int) (Pattern, error) {
+	return PatternFactory(logs, r, c).loadFile(path, n)
+}
+
 // get hex on the fly
 func (p Pattern) loadFile(rootPath string, idx int) (Pattern, error) {
 	return p, nil
